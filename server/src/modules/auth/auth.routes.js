@@ -1,10 +1,11 @@
 import express from 'express'
-import { registerUser } from './auth.controller.js';
+import { registration } from './auth.controller.js';
 
 
 
 const router = express.Router();
-const authRouter = router.post("/register",registerUser)
+//const authRouter = router.post("/register",registration)  we can just skip these steps and directly export the router 
+// and then import it inside a new function under a new variable name 
 
-
-export default authRouter;
+router.post("/register",registration)
+export default router;
