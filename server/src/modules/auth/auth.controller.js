@@ -1,3 +1,6 @@
+//Receives request data and sends the HTTP response.
+
+
 export function registerUser (req,res){
         const name = req.body.name
         const email = req.body.email

@@ -1,3 +1,6 @@
+// Defines the user structure and saves the user to MongoDB through Mongoose.
+
+
 import mongoose from 'mongoose'
 const { Schema } = mongoose;
 const userSchema = new Schema({
