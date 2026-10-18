@@ -1,4 +1,5 @@
-// Checks the email, hashes the password, and creates the user.
+// Checks the email, hashes the password, and creates the user , creates a user and works with db
+
 import jwt from "jsonwebtoken";
 import User from "./user.model.js";
 import bcrypt from "bcrypt";
@@ -32,13 +33,15 @@ export async function registerUser(name, email, password) {                    /
 export async function loginUser(email, password) {
     const loggedUser = await User.findOne({ email: email })  // if emails dont match , the user doesnt exist , create a new accc
     if (!loggedUser) {
-        const error = new Error("Invalid email or password");
+        const error = new Error("Invalid email or password"); //this means either user doesnt exist or email is wrong
         error.statusCode = 401;
         throw error
     }
+
     const isPasswordValid = await bcrypt.compare(password, loggedUser.passwordHash)
+
     if (!isPasswordValid) {         //if the passwords don't match try again , incorrect entry
-        const error = new Error("Invalid email or password");
+        const error = new Error("Invalid email or password"); // same here
         error.statusCode = 401;
         throw error
     }
