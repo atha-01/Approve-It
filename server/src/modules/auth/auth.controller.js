@@ -45,7 +45,7 @@ export async function registration(req, res) {
             message: statusCode === 409 ? error.message : "Internal server error"
         });
     }
-}
+} 
 
 export async function login(req, res) {
     try {
