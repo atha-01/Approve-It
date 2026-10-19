@@ -13,4 +13,5 @@ export async function createIdea(title,description,submittedBy){
         submittedBy : newIdea.submittedBy,
         status : newIdea.status,
     }
+    
 }
