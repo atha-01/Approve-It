@@ -15,3 +15,8 @@ export async function createIdea(title,description,submittedBy){
     }
     
 }
+
+export async function getIdeasByUser(userId){
+    const fetchIdeas = await IdeaModel.find({submittedBy:userId})
+    return fetchIdeas
+}
