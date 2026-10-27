@@ -1,0 +1,48 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  student
+  teacher
+}
+
+enum IdeaStatus {
+  pending
+  under_review
+  approved
+  rejected
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(student)
+  createdAt      DateTime @default(now())
+
+  submittedIdeas Idea[] @relation("IdeaSubmitter")
+  reviewedIdeas  Idea[] @relation("IdeaReviewer")
+}
+
+model Idea {
+  id            String     @id @default(uuid()) @db.Uuid
+  title         String
+  description   String
+  status        IdeaStatus @default(pending)
+  submittedById String     @db.Uuid
+  reviewedById  String?    @db.Uuid
+  reviewedAt    DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  submittedBy User  @relation("IdeaSubmitter", fields: [submittedById], references: [id], onDelete: Restrict)
+  reviewedBy  User? @relation("IdeaReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+}
