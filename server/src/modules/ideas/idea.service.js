@@ -1,22 +1,30 @@
-import IdeaModel from "./idea.model.js";
+import prisma from "../../config/prisma.ts";
 
 export async function createIdea(title,description,submittedBy){
-    const newIdea = await IdeaModel.create({
-        title:title,
-        description:description,
-        submittedBy: submittedBy,
+    const newIdea = await prisma.idea.create({
+        data:{
+            title:title,
+            description:description,
+            submittedById: submittedBy,
+        }
+        
     });
     return {
-        _id : newIdea._id,
+        id : newIdea.id,
         title : newIdea.title,
         description : newIdea.description,
-        submittedBy : newIdea.submittedBy,
+        submittedBy : newIdea.submittedById,
         status : newIdea.status,
     }
     
 }
 
 export async function getIdeasByUser(userId){
-    const fetchIdeas = await IdeaModel.find({submittedBy:userId})
-    return fetchIdeas
+    const fetchIdeas = await prisma.idea.findMany({
+        where:{
+            submittedById:userId,
+        },
+        
+    });
+    return fetchIdeas;
 }
