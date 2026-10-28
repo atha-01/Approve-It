@@ -1,4 +1,4 @@
-import { createIdea, getIdeasByUser} from "./idea.service.js";
+import { createIdea, getIdeasByUser , getAllIdeasForReview} from "./idea.service.js";
 
 export async function ideaController(req,res){
     try{
@@ -25,6 +25,18 @@ export async function searchIdeas(req,res){
     catch(error){
         return res.status(500).json({
             message:"Something went wrong"
+        })
+    }
+}
+
+export async function teacherReview (req,res){
+    try {
+        const ideas = await getAllIdeasForReview()
+        return res.status(200).json(ideas)
+    }
+    catch(error){
+        return res.status(500).json({
+            message:"Something went wrong",
         })
     }
 }

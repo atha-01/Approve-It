@@ -28,3 +28,23 @@ export async function getIdeasByUser(userId){
     });
     return fetchIdeas;
 }
+
+
+export async function getAllIdeasForReview() {
+    const toBeReviewed = await prisma.idea.findMany({
+        include: {
+            submittedBy: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+
+    return toBeReviewed ;
+}
