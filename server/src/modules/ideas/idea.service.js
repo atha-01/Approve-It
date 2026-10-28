@@ -48,3 +48,19 @@ export async function getAllIdeasForReview() {
 
     return toBeReviewed ;
 }
+
+
+export async function teacherApprovalUpdate(ideaId,teacherId,status){
+    const searchResult = await prisma.idea.update({
+        where:{
+            id : ideaId
+        },
+        data:{
+            status: status,
+            reviewedById : teacherId,
+            reviewedAt : new Date()
+        }
+
+    })
+    return searchResult;
+}
