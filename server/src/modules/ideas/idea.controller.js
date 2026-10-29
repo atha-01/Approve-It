@@ -4,6 +4,7 @@ import {
     getAllIdeasForReview,
     teacherApprovalUpdate,
     getAllIdeasForDatabase,
+    findIdeaByStudents,
 } from "./idea.service.js";
 
 import { processIdeaPdfUpload } from "./idea.upload.js";
@@ -146,7 +147,7 @@ export async function reviewIdeaController(req,res){
         }
         
     }
-    catch(error){
+    catch(error){cx
         console.error(error)
         return res.status(500).json({
             message: "Something went wrong"
@@ -158,7 +159,13 @@ export async function reviewIdeaController(req,res){
 export async function getAllIdeasController(req,res){
     try{
         const year = req.query.academicYear;
+        if(!year){
+            return res.status(400).json({
+                message:"No records for this year"
+            })
+        }
         const recievedIdeaDetails = await getAllIdeasForDatabase(year);
+        
 
         res.status(200).json(recievedIdeaDetails);
     }
@@ -167,4 +174,31 @@ export async function getAllIdeasController(req,res){
             message:"Something went wrong..."
         })
     }
+}
+
+export async function findIdeasByStdsController(req,res){
+    try{
+
+    const result = req.params.id;
+    if(!result){
+        return res.status(400).json({
+            message:"Couldn't find any idea to query"
+        })
+    }
+    const recievedRes = await findIdeaByStudents(result);
+    if(!recievedRes){
+        return res.status(404).json({
+            message:"Please enter an Idea",
+        })
+    }
+    else{  
+        return res.status(200).json(recievedRes)
+    }
+    
+    }
+    catch(error){
+        return res.status(500).json({
+            message:"Internal Server Error."
+        })
+    } 
 }

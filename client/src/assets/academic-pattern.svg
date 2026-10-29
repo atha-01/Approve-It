@@ -1,0 +1,62 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <g fill="none" stroke="#6688c9" stroke-width="1.6"
+     stroke-linecap="round" stroke-linejoin="round" opacity=".38">
+
+    <!-- Graduation mortarboard -->
+    <g transform="translate(90 100)">
+      <path d="M0 25 L65 0 L130 25 L65 50 Z"/>
+      <path d="M25 35 V58 Q65 82 105 58 V35"/>
+      <path d="M130 25 V60"/>
+      <circle cx="130" cy="63" r="3"/>
+      <path d="M130 66 L125 82 M130 66 L135 82"/>
+    </g>
+
+    <!-- Geometry -->
+    <g transform="translate(580 75)">
+      <path d="M0 95 L55 0 L115 95 Z"/>
+      <path d="M55 0 V95 M0 95 L80 48"/>
+      <circle cx="55" cy="48" r="3"/>
+    </g>
+
+    <!-- Mathematical equations -->
+    <g font-family="Georgia, serif" font-size="27" font-style="italic"
+       stroke="none" fill="#6688c9">
+      <text x="300" y="105">∫ x² dx</text>
+      <text x="690" y="245">E = mc²</text>
+      <text x="330" y="420">π</text>
+      <text x="90" y="530">f(x)</text>
+      <text x="700" y="565">√x</text>
+    </g>
+
+    <!-- Open book -->
+    <g transform="translate(630 390)">
+      <path d="M0 15 Q45 -2 85 20 Q125 -2 170 15 V95 Q125 75 85 100 Q45 75 0 95 Z"/>
+      <path d="M85 20 V100"/>
+      <path d="M15 35 Q45 27 70 39 M15 50 Q45 42 70 54 M15 65 Q45 57 70 69"/>
+      <path d="M100 39 Q125 27 155 35 M100 54 Q125 42 155 50 M100 69 Q125 57 155 65"/>
+    </g>
+
+    <!-- Atom -->
+    <g transform="translate(260 565)">
+      <ellipse cx="0" cy="0" rx="48" ry="18"/>
+      <ellipse cx="0" cy="0" rx="48" ry="18" transform="rotate(60)"/>
+      <ellipse cx="0" cy="0" rx="48" ry="18" transform="rotate(-60)"/>
+      <circle r="4" fill="#6688c9"/>
+    </g>
+
+    <!-- Geometric cube -->
+    <g transform="translate(430 230)">
+      <path d="M0 20 L45 0 L90 20 L45 42 Z"/>
+      <path d="M0 20 V72 L45 94 L90 72 V20 M45 42 V94"/>
+    </g>
+
+    <!-- Small decorative dots -->
+    <g fill="#6688c9" stroke="none">
+      <circle cx="205" cy="250" r="3"/>
+      <circle cx="510" cy="510" r="3"/>
+      <circle cx="820" cy="320" r="3"/>
+      <circle cx="510" cy="160" r="3"/>
+    </g>
+  </g>
+</svg>

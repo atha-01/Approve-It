@@ -49,12 +49,12 @@ export async function createIdea({
 }
 
 
-export async function getIdeasByUser(userId){
+export async function getIdeasByUser(userId) {
     const fetchIdeas = await prisma.idea.findMany({
-        where:{
-            submittedById:userId,
+        where: {
+            submittedById: userId,
         },
-        
+
     });
     return fetchIdeas;
 }
@@ -76,60 +76,86 @@ export async function getAllIdeasForReview() {
         },
     });
 
-    return toBeReviewed ;
+    return toBeReviewed;
 }
 
 
-export async function teacherApprovalUpdate(ideaId,teacherId,status){
+export async function teacherApprovalUpdate(ideaId, teacherId, status) {
     const searchResult = await prisma.idea.update({
-        where:{
-            id : ideaId
+        where: {
+            id: ideaId
         },
-        data:{
+        data: {
             status: status,
-            reviewedById : teacherId,
-            reviewedAt : new Date()
+            reviewedById: teacherId,
+            reviewedAt: new Date()
         },
-        select:{
-            id:true,
-            title:true, 
-            description:true,
-            status:true, 
-            academicYear:true,
-            submittedById:true, 
-            uploadedById:true, 
-            reviewedById:true,
-            reviewedAt:true, 
-            createdAt:true, 
-            updatedAt:true
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            status: true,
+            academicYear: true,
+            submittedById: true,
+            uploadedById: true,
+            reviewedById: true,
+            reviewedAt: true,
+            createdAt: true,
+            updatedAt: true
         }
 
     })
     return searchResult;
 }
 
-    export async function getAllIdeasForDatabase(academicYear){
-        const searchResult = await prisma.idea.findMany({
-            where:{
-                academicYear : academicYear
-            },
+export async function getAllIdeasForDatabase(academicYear) {
+    const searchResult = await prisma.idea.findMany({
+        where: {
+            academicYear: academicYear
+        },
 
-            select:{
-                title: true,
-                status:true,
-                academicYear:true,
-                createdAt:true,
+        select: {
+            title: true,
+            status: true,
+            academicYear: true,
+            createdAt: true,
 
-                submittedBy:{
-                    select: {
-                    name:true,
+            submittedBy: {
+                select: {
+                    name: true,
                 },
-                }
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
+            }
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
 
-        })
-        return searchResult;
-    }
+    })
+    return searchResult;
+}
+
+export async function findIdeaByStudents(ideaId) {
+    const searchResult = await prisma.idea.findUnique({
+        where: {
+            id: ideaId
+        },
+        select: {
+            id:true,
+            title: true,
+            description: true,
+            status: true,
+            academicYear: true,
+            submittedBy: {
+                select: {
+                    name: true,
+                },
+            },
+            uploadedById: true,
+            reviewedById: true,
+            reviewedAt: true,
+            createdAt: true,
+            updatedAt: true
+        }
+    })
+    return searchResult;
+}
