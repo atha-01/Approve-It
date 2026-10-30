@@ -13,6 +13,11 @@ import StudentDashboard from "./pages/StudentDashboard.jsx";
 import TeacherDashboard from "./pages/TeacherDashboard.jsx";
 import SubmitIdea from "./pages/SubmitIdea.jsx";
 import IdeaDatabase from "./pages/IdeaDatabase.jsx";
+import IdeaDetails from "./pages/ideaDetails.jsx";
+import TeacherReview from "./pages/teacherReview.jsx";
+import Archives from "./pages/archives.jsx";
+import ApprovedIdeas from "./pages/ApprovedIdeas.jsx";
+import Profile from "./pages/profile.jsx";
 
 import "./App.css";
 
@@ -47,13 +52,18 @@ function AppRoutes() {
       <Route path="/database" element={<IdeaDatabase />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/approved-ideas" element={<ApprovedIdeas />} />
+      <Route path="/archives" element={<Archives />} />
+      <Route path="/profile" element={<Profile />} />
 
       {/* Student pages */}
       <Route path="/dashboard" element={<StudentDashboard />} />
       <Route path="/submit-idea" element={<SubmitIdea />} />
+      <Route path="/ideas/:id" element={<IdeaDetails />} />
 
       {/* Teacher pages */}
       <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher/review/:id" element={<TeacherReview />} />
 
       {/* Other features */}
       <Route

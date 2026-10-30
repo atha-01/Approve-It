@@ -1,7 +1,13 @@
 
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, GraduationCap, LockKeyhole, Mail } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  GraduationCap,
+  LockKeyhole,
+  Mail,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -9,6 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [role, setRole] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,16 +38,23 @@ export default function Login() {
       const user = await login({
         email: normalizedEmail,
         password,
+        role,
       });
 
       const requestedPath = location.state?.from;
-      const defaultPath =
-        user.role === "teacher" ? "/teacher/dashboard" : "/dashboard";
 
-      navigate(requestedPath || defaultPath, { replace: true });
+      const defaultPaths = {
+        student: "/dashboard",
+        teacher: "/teacher/dashboard",
+        admin: "/admin/dashboard",
+      };
+
+      navigate(requestedPath || defaultPaths[user.role], {
+        replace: true,
+      });
     } catch (error) {
       setErrorMessage(
-        error.message || "Unable to log in. Please try again.",
+        error.message || "Unable to log in. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -59,14 +73,39 @@ export default function Login() {
           <GraduationCap size={27} />
         </div>
 
-        <p className="auth-eyebrow">APPROVEIT · STUDENT & FACULTY PORTAL</p>
+        <p className="auth-eyebrow">
+          APPROVEIT · STUDENT, FACULTY & ADMIN PORTAL
+        </p>
+
         <h1>Welcome back</h1>
+
         <p className="auth-description">
-          Sign in to follow your ideas and manage your project submissions.
+          Sign in to access your ApproveIT account.
         </p>
 
         <form className="auth-form" onSubmit={submitLogin}>
+          <label>Login as</label>
+
+          <div className="login-role-options">
+            {["student", "teacher", "admin"].map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`login-role-option ${
+                  role === item ? "active" : ""
+                }`}
+                onClick={() => {
+                  setRole(item);
+                  setErrorMessage("");
+                }}
+              >
+                {item.charAt(0).toUpperCase() + item.slice(1)}
+              </button>
+            ))}
+          </div>
+
           <label htmlFor="login-email">Email address</label>
+
           <div className="auth-input-wrap">
             <Mail size={18} aria-hidden="true" />
             <input
@@ -81,6 +120,7 @@ export default function Login() {
           </div>
 
           <label htmlFor="login-password">Password</label>
+
           <div className="auth-input-wrap">
             <LockKeyhole size={18} aria-hidden="true" />
             <input
@@ -110,10 +150,19 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="auth-switch">
-          New to ApproveIT?{" "}
-          <Link to="/register">Create an account</Link>
-        </p>
+        {role === "student" && (
+          <p className="auth-switch">
+            New to ApproveIT?{" "}
+            <Link to="/register">Create an account</Link>
+          </p>
+        )}
+
+        {role === "teacher" && (
+          <p className="auth-switch">
+            Not registered as a teacher?{" "}
+            <Link to="/teacher-register">Register as a teacher</Link>
+          </p>
+        )}
 
         <p className="auth-security-note">
           Your account access is verified by the ApproveIT server.

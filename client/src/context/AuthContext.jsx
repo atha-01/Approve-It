@@ -84,8 +84,12 @@ export function AuthProvider({ children }) {
     };
   }, [logout]);
 
-  const login = useCallback(async ({ email, password }) => {
-    const result = await loginUserRequest({ email, password });
+  const login = useCallback(async ({ email, password, role }) => {
+    const result = await loginUserRequest({
+        email,
+        password,
+        role,
+    });
 
     // Only save a session after the backend accepts the credentials.
     sessionStorage.setItem(TOKEN_KEY, result.token);

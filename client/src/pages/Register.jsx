@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
+  BookOpen,
 } from "lucide-react";
 import { registerStudent } from "../services/authService";
 import Navbar from "../components/layout/Navbar";
@@ -18,6 +19,7 @@ import Navbar from "../components/layout/Navbar";
 export default function Register() {
   const navigate = useNavigate();
 
+  const [role, setRole] = useState("student");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -53,18 +55,28 @@ export default function Register() {
     setIsSubmitting(true);
 
     try {
-      await registerStudent({
-        name: form.name.trim(),
-        email: form.email.trim(),
-        password: form.password,
-      });
+      if (role === "student") {
+        await registerStudent({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+        });
 
-      navigate("/login", {
-        replace: true,
-        state: { message: "Your account was created. You can now log in." },
-      });
+        navigate("/login", {
+          replace: true,
+          state: {
+            message: "Your student account was created. You can now log in.",
+          },
+        });
+      } else {
+        setError(
+          "Teacher registration is not connected yet. We'll enable it in the next step."
+        );
+      }
     } catch (requestError) {
-      setError(requestError.message || "Registration failed. Please try again.");
+      setError(
+        requestError.message || "Registration failed. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -85,17 +97,58 @@ export default function Register() {
             <GraduationCap size={25} aria-hidden="true" />
           </div>
 
-          <p className="auth-eyebrow">CREATE YOUR ACCOUNT</p>
-          <h1 id="register-title">Start with an idea.</h1>
+          <p className="auth-eyebrow">JOIN APPROVEIT</p>
+          <h1 id="register-title">Create your account.</h1>
           <p className="auth-description">
-            Create your student account to explore ideas and track your project
-            through the approval process.
+            Choose your account type to get started.
           </p>
+
+          <div className="register-role-options">
+            <button
+              type="button"
+              className={`register-role-option ${
+                role === "student" ? "active" : ""
+              }`}
+              onClick={() => {
+                setRole("student");
+                setError("");
+              }}
+            >
+              <GraduationCap size={21} />
+              <span>Student</span>
+              <small>Register directly</small>
+            </button>
+
+            <button
+              type="button"
+              className={`register-role-option ${
+                role === "teacher" ? "active" : ""
+              }`}
+              onClick={() => {
+                setRole("teacher");
+                setError("");
+              }}
+            >
+              <BookOpen size={21} />
+              <span>Teacher</span>
+              <small>Requires verification</small>
+            </button>
+          </div>
+
+          {role === "teacher" && (
+            <div className="teacher-registration-notice">
+              <ShieldCheck size={18} />
+              <p>
+                Teacher registrations are manually verified by the Admin.
+                Approval may take up to 24 hours.
+              </p>
+            </div>
+          )}
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label htmlFor="register-name">Full name</label>
             <div className="auth-input-wrap">
-              <UserRound size={18} aria-hidden="true" />
+              <UserRound size={18} />
               <input
                 id="register-name"
                 name="name"
@@ -111,7 +164,7 @@ export default function Register() {
 
             <label htmlFor="register-email">College email</label>
             <div className="auth-input-wrap">
-              <Mail size={18} aria-hidden="true" />
+              <Mail size={18} />
               <input
                 id="register-email"
                 name="email"
@@ -126,7 +179,7 @@ export default function Register() {
 
             <label htmlFor="register-password">Password</label>
             <div className="auth-input-wrap">
-              <LockKeyhole size={18} aria-hidden="true" />
+              <LockKeyhole size={18} />
               <input
                 id="register-password"
                 name="password"
@@ -144,11 +197,7 @@ export default function Register() {
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? (
-                  <EyeOff size={18} aria-hidden="true" />
-                ) : (
-                  <Eye size={18} aria-hidden="true" />
-                )}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
@@ -156,7 +205,7 @@ export default function Register() {
               Confirm password
             </label>
             <div className="auth-input-wrap">
-              <LockKeyhole size={18} aria-hidden="true" />
+              <LockKeyhole size={18} />
               <input
                 id="register-confirm-password"
                 name="confirmPassword"
@@ -170,15 +219,17 @@ export default function Register() {
               <button
                 type="button"
                 className="password-visibility-button"
-                onClick={() => setShowConfirmPassword((value) => !value)}
+                onClick={() =>
+                  setShowConfirmPassword((value) => !value)
+                }
                 aria-label={
                   showConfirmPassword ? "Hide password" : "Show password"
                 }
               >
                 {showConfirmPassword ? (
-                  <EyeOff size={18} aria-hidden="true" />
+                  <EyeOff size={18} />
                 ) : (
-                  <Eye size={18} aria-hidden="true" />
+                  <Eye size={18} />
                 )}
               </button>
             </div>
@@ -194,10 +245,12 @@ export default function Register() {
               className="auth-submit-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating account..." : "Create account"}
-              {!isSubmitting && (
-                <ArrowRight size={17} aria-hidden="true" />
-              )}
+              {isSubmitting
+                ? "Creating account..."
+                : role === "student"
+                  ? "Create student account"
+                  : "Submit teacher registration"}
+              {!isSubmitting && <ArrowRight size={17} />}
             </button>
           </form>
 
@@ -206,8 +259,7 @@ export default function Register() {
           </p>
 
           <p className="auth-security-note">
-            <ShieldCheck size={14} aria-hidden="true" /> Student accounts are
-            registered through ApproveIT.
+            <ShieldCheck size={14} /> Admin accounts are created privately.
           </p>
         </section>
       </main>

@@ -26,12 +26,15 @@ export function registerStudent({ name, email, password }) {
   });
 }
 
-export function loginUser({ email, password }) {
+
+export function loginUser({ email, password, role }) {
   return sendAuthenticationRequest("login", {
     email,
     password,
+    role,
   });
 }
+
 
 export async function getCurrentUser(token) {
   const response = await fetch(`${API_BASE_URL}/me`, {
