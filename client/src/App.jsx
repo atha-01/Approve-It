@@ -1,11 +1,19 @@
+
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import { Database, Code2 } from "lucide-react";
+import { Code2, Database } from "lucide-react";
+
 import { ThemeProvider } from "./context/ThemeContext";
-import Register from "./pages/Register.jsx";
-import StudentDashboard from "./pages/StudentDashboard.jsx";
+
+import Navbar from "./components/layout/Navbar";
+
 import Home from "./pages/home.jsx";
 import Login from "./pages/login.jsx";
-import Navbar from "./components/layout/Navbar";
+import Register from "./pages/Register.jsx";
+import StudentDashboard from "./pages/StudentDashboard.jsx";
+import TeacherDashboard from "./pages/TeacherDashboard.jsx";
+import SubmitIdea from "./pages/SubmitIdea.jsx";
+import IdeaDatabase from "./pages/IdeaDatabase.jsx";
+
 import "./App.css";
 
 function FeaturePlaceholder({ title, description, icon: Icon }) {
@@ -34,26 +42,20 @@ function FeaturePlaceholder({ title, description, icon: Icon }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public pages */}
       <Route path="/" element={<Home />} />
-
-      <Route
-        path="/database"
-        element={
-          <FeaturePlaceholder
-            title="Explore the Idea Database"
-            description="The database page will connect to your authenticated backend and display real college ideas. Login and API integration are the next implementation steps."
-            icon={Database}
-          />
-        }
-      />
-
+      <Route path="/database" element={<IdeaDatabase />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route
-        path="/dashboard"
-        element={<StudentDashboard />}
-      />
 
+      {/* Student pages */}
+      <Route path="/dashboard" element={<StudentDashboard />} />
+      <Route path="/submit-idea" element={<SubmitIdea />} />
+
+      {/* Teacher pages */}
+      <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+
+      {/* Other features */}
       <Route
         path="/repositories"
         element={
@@ -65,6 +67,7 @@ function AppRoutes() {
         }
       />
 
+      {/* Fallback page */}
       <Route
         path="*"
         element={

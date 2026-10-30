@@ -917,3 +917,561 @@
   outline-offset: 2px;
   border-radius: 5px;
 }
+
+/* Student dashboard */
+
+.student-dashboard {
+  min-height: calc(100vh - 76px);
+  padding-top: 55px;
+  padding-bottom: 75px;
+}
+
+.dashboard-heading {
+  margin-bottom: 30px;
+}
+
+.dashboard-heading h1 {
+  margin: 7px 0;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.dashboard-heading > p:last-child,
+.dashboard-section-heading p {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+  margin-bottom: 42px;
+}
+
+.dashboard-stat {
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.dashboard-stat svg {
+  color: var(--color-primary);
+}
+
+.dashboard-stat h2 {
+  margin: 12px 0 3px;
+  font-size: 27px;
+}
+
+.dashboard-stat p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.dashboard-ideas {
+  margin-bottom: 24px;
+}
+
+.dashboard-section-heading h2 {
+  margin: 0;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 23px;
+  font-weight: 600;
+}
+
+.dashboard-section-heading p {
+  margin: 7px 0 18px;
+}
+
+.dashboard-empty-state {
+  min-height: 220px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.dashboard-empty-state svg {
+  color: var(--color-text-muted);
+}
+
+.dashboard-empty-state h3 {
+  margin: 14px 0 5px;
+  font-size: 16px;
+}
+
+.dashboard-empty-state p {
+  max-width: 390px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.dashboard-database-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  transition: border-color var(--transition-fast);
+}
+
+.dashboard-database-link:hover {
+  border-color: var(--color-primary);
+}
+
+.dashboard-database-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.dashboard-database-link > span:nth-child(2) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-database-link small {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.dashboard-database-link > svg {
+  color: var(--color-primary);
+}
+
+@media (max-width: 600px) {
+  .student-dashboard {
+    padding-top: 38px;
+  }
+
+  .dashboard-stats {
+    gap: 9px;
+  }
+
+  .dashboard-stat {
+    padding: 14px 10px;
+  }
+
+  .dashboard-stat p {
+    font-size: 11px;
+  }
+
+  .dashboard-database-link {
+    gap: 10px;
+    padding: 13px;
+  }
+}
+
+
+/* Teacher dashboard */
+
+.teacher-dashboard {
+  min-height: calc(100vh - 76px);
+  padding-top: 55px;
+  padding-bottom: 75px;
+}
+
+.teacher-submissions {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+  .teacher-dashboard {
+    padding-top: 38px;
+  }
+}
+
+/* Idea database page */
+
+.idea-database {
+  min-height: calc(100vh - 76px);
+  padding-top: 42px;
+  padding-bottom: 75px;
+}
+
+.database-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.database-back-link:hover {
+  color: var(--color-primary);
+}
+
+.database-heading {
+  margin: 35px 0 30px;
+}
+
+.database-heading h1 {
+  margin: 8px 0;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 38px;
+  font-weight: 600;
+}
+
+.database-heading > p:last-child {
+  max-width: 560px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.database-search-section {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.database-search {
+  min-height: 58px;
+  padding: 7px 8px 7px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+}
+
+.database-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.database-search button,
+.database-apply-filter {
+  min-height: 40px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .database-search button,
+[data-theme="dark"] .database-apply-filter {
+  color: #10131a;
+}
+
+.database-filters {
+  margin-top: 17px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.database-filters > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.database-filters select {
+  min-height: 39px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.database-apply-filter {
+  min-height: 39px;
+  font-size: 12px;
+}
+
+.database-results {
+  margin-top: 38px;
+}
+
+.database-results-heading h2 {
+  margin: 0;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.database-results-heading p {
+  margin: 7px 0 20px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.database-empty-state {
+  min-height: 260px;
+  padding: 35px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.database-empty-icon {
+  width: 55px;
+  height: 55px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.database-empty-state h3 {
+  margin: 17px 0 7px;
+  font-size: 17px;
+}
+
+.database-empty-state > p {
+  max-width: 420px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.database-coming-soon {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .idea-database {
+    padding-top: 30px;
+  }
+
+  .database-heading h1 {
+    font-size: 32px;
+  }
+
+  .database-search-section {
+    padding: 13px;
+  }
+
+  .database-search button {
+    padding-inline: 12px;
+  }
+}
+
+/* Submit Idea Page */
+
+.submit-idea {
+  max-width: 850px;
+  padding-top: 42px;
+  padding-bottom: 80px;
+}
+
+.submit-idea-heading {
+  margin: 42px 0 32px;
+  max-width: 650px;
+}
+
+.submit-idea-heading h1 {
+  margin: 10px 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: -0.04em;
+}
+
+.submit-idea-heading > p:last-child {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.idea-form {
+  padding: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+}
+
+.idea-form-intro {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 30px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.idea-form-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.idea-form-intro h2 {
+  margin: 0 0 5px;
+  font-size: 1.1rem;
+}
+
+.idea-form-intro p,
+.idea-form-footer p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.idea-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 23px;
+}
+
+.idea-form-field label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.idea-form-field input,
+.idea-form-field select,
+.idea-form-field textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.idea-form-field textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.idea-form-field input:focus,
+.idea-form-field select:focus,
+.idea-form-field textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.idea-form-field input::placeholder,
+.idea-form-field textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+.idea-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+}
+
+.idea-form-footer button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.idea-form-footer button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .submit-idea {
+    padding-top: 28px;
+  }
+
+  .idea-form {
+    padding: 21px 17px;
+  }
+
+  .idea-form-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .idea-form-footer button {
+    width: 100%;
+  }
+}
+
+
+/* updated the css for studentdashboard */
+
+
+.dashboard-submit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 12px 18px;
+  border-radius: 9px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dashboard-submit-link:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
