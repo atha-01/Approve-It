@@ -50,26 +50,41 @@ return {
 };
 }
 
-export async function loginUser(email, password) {
-const loggedUser = await prisma.user.findUnique({
-    where: { email: email.trim().toLowerCase() },                                          // if emails dont match , the user doesnt exist , create a new accc
-});                                                                
+
+export async function loginUser(email, password, role) {
+    const loggedUser = await prisma.user.findUnique({
+        where: {
+            email: email.trim().toLowerCase()
+        }
+    });
+
     if (!loggedUser) {
-        const error = new Error("Invalid email or password"); //this means either user doesnt exist or email is wrong
+        const error = new Error("Invalid email or password");
         error.statusCode = 401;
-        throw error
+        throw error;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, loggedUser.passwordHash)
-
-    if (!isPasswordValid) {         //if the passwords don't match try again , incorrect entry
-        const error = new Error("Invalid email or password"); // same here
-        error.statusCode = 401;
-        throw error
+    // Check whether the selected login role matches the account role.
+    if (loggedUser.role !== role) {
+        const error = new Error("You selected the wrong login type.");
+        error.statusCode = 403;
+        throw error;
     }
+
+    const isPasswordValid = await bcrypt.compare(
+        password,
+        loggedUser.passwordHash
+    );
+
+    if (!isPasswordValid) {
+        const error = new Error("Invalid email or password");
+        error.statusCode = 401;
+        throw error;
+    }
+
     const token = jwt.sign(
         {
-            userId: loggedUser.id,  
+            userId: loggedUser.id,
             role: loggedUser.role
         },
         process.env.JWT_SECRET,

@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   student
   teacher
+  admin
 }
 
 enum IdeaStatus {

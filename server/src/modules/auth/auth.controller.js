@@ -47,31 +47,40 @@ export async function registration(req, res) {
     }
 } 
 
+
 export async function login(req, res) {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
 
         // Validate required fields
         if (
             typeof email !== "string" ||
             typeof password !== "string" ||
+            typeof role !== "string" ||
             !email.trim() ||
-            !password
+            !password ||
+            !["student", "teacher", "admin"].includes(role)
         ) {
             return res.status(400).json({
-                message: "Email and Password required"
+                message: "Valid email, password, and login role are required."
             });
         }
 
-        const userLoggedIn = await loginUser(email.trim().toLocaleLowerCase(), password);
+        const userLoggedIn = await loginUser(
+            email.trim().toLowerCase(),
+            password,
+            role
+        );
 
-
-    return res.status(200).json(userLoggedIn);
+        return res.status(200).json(userLoggedIn);
 
     } catch (error) {
         const statusCode = error.statusCode || 500;
+
         return res.status(statusCode).json({
-            message: statusCode === 401 ? error.message : "Internal server error"
+            message: [401, 403].includes(statusCode)
+                ? error.message
+                : "Internal server error"
         });
     }
 }
