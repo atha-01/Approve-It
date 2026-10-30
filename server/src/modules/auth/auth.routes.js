@@ -3,7 +3,7 @@ import { registration } from './auth.controller.js';
 import { login } from './auth.controller.js';
 import { auth } from "../../middleware/auth.js";
 import { requireRole } from '../../middleware/requireRole.js';
-
+import { teacherRegistrationController } from './auth.controller.js';
 
 
 
@@ -18,4 +18,5 @@ router.get("/test", auth, requireRole("teacher"), (req, res) => {
 });
 router.post("/register",registration);
 router.post("/login", login);
+router.post("/teacher-register",teacherRegistrationController)
 export default router;

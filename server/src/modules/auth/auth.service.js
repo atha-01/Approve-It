@@ -103,3 +103,49 @@ export async function loginUser(email, password, role) {
         }
     };
 }
+export async function registerTeacherApplication(name,email,password){
+    const searchInUserTable = await prisma.user.findUnique({
+        where:{
+            email:email.trim().toLowerCase(),
+        }
+    })
+    if(searchInUserTable){
+        const error = new Error("Teacher with this Email already exists");
+        error.statusCode = 409;
+        throw error;
+    }
+    const searchInTeachersTable = await prisma.teacherApplication.findUnique({
+        where:{
+            email:email.trim().toLowerCase(),
+        }
+    })
+    if(searchInTeachersTable){
+        const error = new Error("Teacher with this Email already exists");
+        error.statusCode = 409;
+        throw error;
+    }
+    const saltRound = 10;
+    const passwordHash = await bcrypt.hash(password, saltRound)
+    let createTeacher ;
+
+    try{
+        createTeacher = await prisma.teacherApplication.create({
+            data:{
+
+                name: name.trim(),
+                email: email.trim().toLowerCase(),
+                passwordHash: passwordHash,
+            }
+        })
+    }
+    catch(error){
+        if(error.code === "P2002"){
+        const creationError = new Error("An application with this email already exists")
+        creationError.statusCode = 409;
+        throw creationError;
+        }
+        throw error;
+       
+    }
+    return createTeacher ;
+}

@@ -19,7 +19,11 @@ enum IdeaStatus {
   approved
   rejected
 }
-
+enum TeacherApplicationStatus {
+  pending
+  approved
+  rejected
+}
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
@@ -56,4 +60,18 @@ model Idea {
   uploadedBy User @relation("IdeaUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
 
   reviewedBy User? @relation("IdeaReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+}
+model TeacherApplication {
+  id           String                   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String                   @unique
+  passwordHash String
+  status       TeacherApplicationStatus @default(pending)
+
+  reviewedAt   DateTime?
+  reviewedById String?                  @db.Uuid
+  rejectionReason String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
