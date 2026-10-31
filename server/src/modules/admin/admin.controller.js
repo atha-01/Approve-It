@@ -1,4 +1,4 @@
-import { getAllTeacherApplications } from "./admin.service";
+import { getAllTeacherApplications } from "./admin.service.js";
 
 export async function getTeacherReqsController(req,res){
     try{

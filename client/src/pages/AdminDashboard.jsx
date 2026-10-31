@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
 
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -9,11 +7,9 @@ import {
   UserX,
   Clock3,
   Search,
-  Bell,
   Menu,
   X,
   GraduationCap,
-  ChevronRight,
   Eye,
   CheckCircle,
   XCircle,
@@ -25,41 +21,7 @@ import {
 
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
-
-const sampleApplications = [
-  {
-    id: 1,
-    name: "Rahul Sharma",
-    email: "rahul@example.com",
-    department: "Computer Science",
-    submittedAt: "30 Oct 2026",
-    status: "pending",
-  },
-  {
-    id: 2,
-    name: "Priya Verma",
-    email: "priya@example.com",
-    department: "Information Technology",
-    submittedAt: "29 Oct 2026",
-    status: "pending",
-  },
-  {
-    id: 3,
-    name: "Aman Gupta",
-    email: "aman@example.com",
-    department: "Electronics",
-    submittedAt: "28 Oct 2026",
-    status: "approved",
-  },
-  {
-    id: 4,
-    name: "Neha Singh",
-    email: "neha@example.com",
-    department: "Mechanical Engineering",
-    submittedAt: "27 Oct 2026",
-    status: "rejected",
-  },
-];
+import { getTeacherApplications } from "../services/adminService";
 
 const navigationItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -69,7 +31,7 @@ const navigationItems = [
 ];
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [search, setSearch] = useState("");
@@ -78,28 +40,87 @@ export default function AdminDashboard() {
   const [notice, setNotice] = useState("");
   const [confirmationAction, setConfirmationAction] = useState(null);
 
-  const applications = sampleApplications;
+  const [applications, setApplications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // Fetch applications from the backend
+  useEffect(() => {
+    if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsLoading(false);
+      setError("Please log in as an administrator.");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchApplications() {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const data = await getTeacherApplications(token);
+
+        if (!cancelled) {
+          setApplications(data);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || "Failed to load applications.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchApplications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  // Calculate dashboard statistics
   const stats = {
     total: applications.length,
-    pending: applications.filter((item) => item.status === "pending").length,
-    approved: applications.filter((item) => item.status === "approved").length,
-    rejected: applications.filter((item) => item.status === "rejected").length,
+    pending: applications.filter(
+      (item) => item.status === "pending"
+    ).length,
+    approved: applications.filter(
+      (item) => item.status === "approved"
+    ).length,
+    rejected: applications.filter(
+      (item) => item.status === "rejected"
+    ).length,
   };
 
+  // Search and filter applications
   const filteredApplications = useMemo(() => {
     return applications.filter((application) => {
+      const searchTerm = search.toLowerCase().trim();
+
       const matchesSearch =
-        application.name.toLowerCase().includes(search.toLowerCase()) ||
-        application.email.toLowerCase().includes(search.toLowerCase()) ||
-        application.department.toLowerCase().includes(search.toLowerCase());
+        application.name.toLowerCase().includes(searchTerm) ||
+        application.email.toLowerCase().includes(searchTerm);
 
       const matchesTab =
-        activeTab === "overview" || application.status === activeTab;
+        activeTab === "overview" ||
+        application.status === activeTab;
 
       return matchesSearch && matchesTab;
     });
   }, [applications, search, activeTab]);
+
+  function formatDate(date) {
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
 
   function handleAction(action) {
     setConfirmationAction(action);
@@ -109,15 +130,11 @@ export default function AdminDashboard() {
     if (!confirmationAction) return;
 
     setNotice(
-      `${confirmationAction === "approve" ? "Approval" : "Rejection"} confirmed. Backend integration is still pending.`,
+      `${confirmationAction === "approve" ? "Approval" : "Rejection"} confirmed. Backend integration is still pending.`
     );
 
     setConfirmationAction(null);
     setSelectedApplication(null);
-  }
-
-  function handleLogout() {
-    logout();
   }
 
   return (
@@ -179,7 +196,9 @@ export default function AdminDashboard() {
                     <span>{item.label}</span>
 
                     {item.id === "pending" && stats.pending > 0 && (
-                      <span className="admin-nav-count">{stats.pending}</span>
+                      <span className="admin-nav-count">
+                        {stats.pending}
+                      </span>
                     )}
                   </button>
                 );
@@ -199,7 +218,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <button className="admin-logout-button" onClick={handleLogout}>
+            <button className="admin-logout-button" onClick={logout}>
               <LogOut size={17} />
               Log out
             </button>
@@ -209,13 +228,18 @@ export default function AdminDashboard() {
         <section className="admin-main">
           <header className="admin-page-header">
             <div>
-              <span className="admin-eyebrow">APPROVEIT ADMINISTRATION</span>
+              <span className="admin-eyebrow">
+                APPROVEIT ADMINISTRATION
+              </span>
+
               <h1>
                 {activeTab === "overview"
                   ? "Dashboard Overview"
-                  : navigationItems.find((item) => item.id === activeTab)
-                      ?.label}
+                  : navigationItems.find(
+                      (item) => item.id === activeTab
+                    )?.label}
               </h1>
+
               <p>
                 Manage teacher registrations and monitor application activity.
               </p>
@@ -236,7 +260,10 @@ export default function AdminDashboard() {
           {notice && (
             <div className="admin-notice" role="status">
               <span>{notice}</span>
-              <button onClick={() => setNotice("")} aria-label="Dismiss notice">
+              <button
+                onClick={() => setNotice("")}
+                aria-label="Dismiss notice"
+              >
                 <X size={17} />
               </button>
             </div>
@@ -249,6 +276,7 @@ export default function AdminDashboard() {
               icon={Users}
               description="All teacher applications"
             />
+
             <StatCard
               label="Pending Review"
               value={stats.pending}
@@ -256,6 +284,7 @@ export default function AdminDashboard() {
               description="Awaiting your decision"
               accent="warning"
             />
+
             <StatCard
               label="Approved Teachers"
               value={stats.approved}
@@ -263,6 +292,7 @@ export default function AdminDashboard() {
               description="Successfully approved"
               accent="success"
             />
+
             <StatCard
               label="Rejected Applications"
               value={stats.rejected}
@@ -275,7 +305,9 @@ export default function AdminDashboard() {
           <section className="admin-applications-section">
             <div className="admin-section-heading">
               <div>
-                <span className="admin-eyebrow">APPLICATION MANAGEMENT</span>
+                <span className="admin-eyebrow">
+                  APPLICATION MANAGEMENT
+                </span>
                 <h2>Teacher Applications</h2>
                 <p>Review and manage teacher registration requests.</p>
               </div>
@@ -286,7 +318,7 @@ export default function AdminDashboard() {
                 <Search size={18} />
                 <input
                   type="search"
-                  placeholder="Search by name, email or department..."
+                  placeholder="Search by name or email..."
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
@@ -298,11 +330,22 @@ export default function AdminDashboard() {
             </div>
 
             <div className="admin-application-list">
-              {filteredApplications.length === 0 ? (
+              {isLoading ? (
+                <div className="admin-empty-state">
+                  <p>Loading applications...</p>
+                </div>
+              ) : error ? (
+                <div className="admin-empty-state">
+                  <h3>Unable to load applications</h3>
+                  <p>{error}</p>
+                </div>
+              ) : filteredApplications.length === 0 ? (
                 <div className="admin-empty-state">
                   <Users size={30} />
                   <h3>No applications found</h3>
-                  <p>Try changing your search or selecting another category.</p>
+                  <p>
+                    Try changing your search or selecting another category.
+                  </p>
                 </div>
               ) : (
                 filteredApplications.map((application) => (
@@ -322,13 +365,10 @@ export default function AdminDashboard() {
                           <Mail size={14} />
                           {application.email}
                         </span>
-                        <span>
-                          <GraduationCap size={14} />
-                          {application.department}
-                        </span>
+
                         <span>
                           <CalendarDays size={14} />
-                          {application.submittedAt}
+                          {formatDate(application.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -365,7 +405,9 @@ export default function AdminDashboard() {
             >
               <div className="admin-modal-header">
                 <div>
-                  <span className="admin-eyebrow">APPLICATION DETAILS</span>
+                  <span className="admin-eyebrow">
+                    APPLICATION DETAILS
+                  </span>
                   <h2 id="admin-detail-title">Teacher Application</h2>
                 </div>
 
@@ -381,6 +423,7 @@ export default function AdminDashboard() {
                 <div className="admin-detail-avatar">
                   {selectedApplication.name.charAt(0)}
                 </div>
+
                 <div>
                   <h3>{selectedApplication.name}</h3>
                   <p>{selectedApplication.email}</p>
@@ -390,13 +433,12 @@ export default function AdminDashboard() {
 
               <div className="admin-detail-fields">
                 <div>
-                  <span>Department</span>
-                  <strong>{selectedApplication.department}</strong>
-                </div>
-                <div>
                   <span>Application date</span>
-                  <strong>{selectedApplication.submittedAt}</strong>
+                  <strong>
+                    {formatDate(selectedApplication.createdAt)}
+                  </strong>
                 </div>
+
                 <div>
                   <span>Application status</span>
                   <strong>{selectedApplication.status}</strong>
@@ -427,6 +469,7 @@ export default function AdminDashboard() {
                 Approval and rejection will become functional after backend
                 integration.
               </p>
+
               {confirmationAction && (
                 <div className="admin-confirm-backdrop">
                   <div
@@ -451,7 +494,9 @@ export default function AdminDashboard() {
 
                     <p>
                       Are you sure you want to{" "}
-                      {confirmationAction === "approve" ? "approve" : "reject"}{" "}
+                      {confirmationAction === "approve"
+                        ? "approve"
+                        : "reject"}{" "}
                       {selectedApplication.name}'s teacher application?
                     </p>
 
