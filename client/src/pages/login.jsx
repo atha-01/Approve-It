@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState,useEffect  } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,6 +7,8 @@ import {
   GraduationCap,
   LockKeyhole,
   Mail,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -15,12 +17,26 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+
   const [role, setRole] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState(
+      location.state?.message || ""
+    );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
+  useEffect(() => {
+  if (!successMessage) return;
+
+  const timer = setTimeout(() => {
+    setSuccessMessage("");
+  }, 10000);
+
+  return () => clearTimeout(timer);
+}, [successMessage]);
   async function submitLogin(event) {
     event.preventDefault();
     setErrorMessage("");
@@ -42,7 +58,7 @@ export default function Login() {
       });
 
       const requestedPath = location.state?.from;
-
+      
       const defaultPaths = {
         student: "/dashboard",
         teacher: "/teacher/dashboard",
@@ -139,6 +155,27 @@ export default function Login() {
               {errorMessage}
             </p>
           )}
+          {successMessage && (
+            <div className="auth-toast" role="status">
+              <div className="auth-toast-icon">
+                <CheckCircle size={21} />
+              </div>
+
+              <div className="auth-toast-content">
+                <strong>Application submitted!</strong>
+                <p>{successMessage}</p>
+              </div>
+
+              <button
+                type="button"
+                className="auth-toast-close"
+                onClick={() => setSuccessMessage("")}
+                aria-label="Close notification"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          )}
 
           <button
             className="auth-submit-button"
@@ -160,7 +197,7 @@ export default function Login() {
         {role === "teacher" && (
           <p className="auth-switch">
             Not registered as a teacher?{" "}
-            <Link to="/teacher-register">Register as a teacher</Link>
+            <Link to="/register">Register as a teacher</Link>
           </p>
         )}
 

@@ -8,8 +8,12 @@ export default function Navbar() {
   const { isAuthenticated, user } = useAuth();
 
   // Send teachers and students to their own dashboards.
-  const dashboardPath =
-    user?.role === "teacher" ? "/teacher/dashboard" : "/dashboard";
+    const dashboardPath =
+      user?.role === "admin"
+        ? "/admin/dashboard"
+        : user?.role === "teacher"
+        ? "/teacher/dashboard"
+        : "/dashboard";
 
   return (
     <header className="site-header">

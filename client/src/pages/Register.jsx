@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { registerTeacher } from "../services/authService";
 import {
   ArrowLeft,
   ArrowRight,
@@ -68,10 +69,21 @@ export default function Register() {
             message: "Your student account was created. You can now log in.",
           },
         });
-      } else {
-        setError(
-          "Teacher registration is not connected yet. We'll enable it in the next step."
-        );
+      } else if(role==="teacher") {
+        // setError(
+        //   "Teacher registration is not connected yet. We'll enable it in the next step."
+        // );
+        await registerTeacher({
+          name:form.name.trim(),
+          email:form.email.trim(),
+          password:form.password,
+        });
+        navigate("/login",{
+          replace:true,
+          state:{
+            message:"Registration application has been submitted successfully. Please wait for Admin approval, which may take up to 24 hours.."
+          }
+        })
       }
     } catch (requestError) {
       setError(
