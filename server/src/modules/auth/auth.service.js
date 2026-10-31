@@ -137,6 +137,7 @@ export async function registerTeacherApplication(name,email,password){
                 passwordHash: passwordHash,
             }
         })
+        
     }
     catch(error){
         if(error.code === "P2002"){
@@ -147,5 +148,10 @@ export async function registerTeacherApplication(name,email,password){
         throw error;
        
     }
-    return createTeacher ;
+    return {
+        id: createTeacher.id,
+        name: createTeacher.name,
+        email: createTeacher.email,
+        status: createTeacher.status
+    } ;
 }
