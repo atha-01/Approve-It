@@ -36,3 +36,56 @@ export async function getMyIdeas(token) {
 
   return result;
 }
+
+export async function getIdeaById(id, token) {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result.message || "Unable to fetch idea details.");
+  }
+
+  return result;
+}
+export async function updateIdeaReview(id, status, token) {
+  const response = await fetch(`${API_BASE_URL}/${id}/review`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(result.message || "Unable to update idea status.");
+  }
+
+  return result;
+}
+export async function getIdeasForReview(token) {
+  const response = await fetch(`${API_BASE_URL}/review`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Unable to fetch ideas for review."
+    );
+  }
+
+  return result;
+}

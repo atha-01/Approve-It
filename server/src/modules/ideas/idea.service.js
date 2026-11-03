@@ -149,21 +149,27 @@ export async function findIdeaByStudents(ideaId) {
             id: ideaId
         },
         select: {
-            id:true,
+            id: true,
             title: true,
             description: true,
+            category: true,
+            problemStatement: true,
+            proposedSolution: true,
             status: true,
             academicYear: true,
+
             submittedBy: {
                 select: {
                     name: true,
+                    email: true,
                 },
             },
+
             uploadedById: true,
             reviewedById: true,
             reviewedAt: true,
             createdAt: true,
-            updatedAt: true
+            updatedAt: true,
         }
     })
     return searchResult;
