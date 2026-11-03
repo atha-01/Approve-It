@@ -17,3 +17,22 @@ export async function submitIdea({ formData, token }) {
 
   return result;
 }
+
+export async function getMyIdeas(token) {
+  const response = await fetch(API_BASE_URL, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Unable to fetch your submitted ideas."
+    );
+  }
+
+  return result;
+}

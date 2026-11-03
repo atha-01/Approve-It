@@ -3,28 +3,124 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Send, Lightbulb } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { submitIdea } from "../services/IdeaService";
 
 export default function SubmitIdea() {
+  const { token } = useAuth();
+
   const [formData, setFormData] = useState({
     title: "",
     category: "",
     description: "",
     problemStatement: "",
     proposedSolution: "",
+    academicYear: "",
   });
+
+  const [pdf, setPdf] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   function handleChange(event) {
     const { name, value } = event.target;
+
     setFormData((previous) => ({
       ...previous,
       [name]: value,
     }));
   }
 
-  function handleSubmit(event) {
+  function handlePdfChange(event) {
+    const file = event.target.files[0];
+
+    setPdf(null);
+    setAlert(null);
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setAlert({
+        type: "error",
+        title: "Invalid PDF",
+        message: "Please select a valid PDF file.",
+      });
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setAlert({
+        type: "error",
+        title: "File too large",
+        message:
+          "Your synopsis PDF must not exceed 10 MB. Please choose a smaller file.",
+      });
+
+      event.target.value = "";
+      return;
+    }
+
+    setPdf(file);
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    // Backend submission will be connected after the form is ready.
-    console.log("Idea details:", formData);
+
+    setAlert(null);
+
+    if (!pdf) {
+      setAlert({
+        type: "error",
+        title: "PDF required",
+        message:
+          "Please upload your synopsis PDF before submitting your idea.",
+      });
+      return;
+    }
+
+    if (!token) {
+      setAlert({
+        type: "error",
+        title: "Session expired",
+        message: "Please log in again before submitting your idea.",
+      });
+      return;
+    }
+
+    const data = new FormData();
+
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+
+    data.append("pdf", pdf);
+
+    try {
+      setIsSubmitting(true);
+
+      await submitIdea({
+        formData: data,
+        token,
+      });
+
+      setAlert({
+        type: "success",
+        title: "Idea submitted successfully!",
+        message:
+          "Your project idea has been submitted and is waiting for teacher review.",
+      });
+    } catch (error) {
+      setAlert({
+        type: "error",
+        title: "Submission failed",
+        message:
+          error.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -81,7 +177,9 @@ export default function SubmitIdea() {
               <option value="">Select a category</option>
               <option value="web-development">Web Development</option>
               <option value="app-development">App Development</option>
-              <option value="artificial-intelligence">Artificial Intelligence</option>
+              <option value="artificial-intelligence">
+                Artificial Intelligence
+              </option>
               <option value="machine-learning">Machine Learning</option>
               <option value="iot">Internet of Things</option>
               <option value="cybersecurity">Cybersecurity</option>
@@ -128,15 +226,63 @@ export default function SubmitIdea() {
             />
           </div>
 
+          <div className="idea-form-field">
+            <label htmlFor="academicYear">Academic year</label>
+            <input
+              id="academicYear"
+              name="academicYear"
+              value={formData.academicYear}
+              onChange={handleChange}
+              placeholder="e.g. 2026-2027"
+              required
+            />
+          </div>
+
+          <div className="idea-form-field">
+            <label htmlFor="pdf">Synopsis PDF (Maximum 10 MB)</label>
+            <input
+              id="pdf"
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={handlePdfChange}
+              required
+            />
+            {pdf && <p>Selected file: {pdf.name}</p>}
+          </div>
+
           <div className="idea-form-footer">
             <p>You can review your idea before submitting it.</p>
-            <button type="submit">
+
+            <button type="submit" disabled={isSubmitting}>
               <Send size={16} />
-              Submit for review
+              {isSubmitting ? "Submitting..." : "Submit for review"}
             </button>
           </div>
         </form>
       </main>
+
+      {alert && (
+        <div className="idea-alert-overlay">
+          <div
+            className="idea-alert-popup"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="idea-alert-title"
+            aria-describedby="idea-alert-message"
+          >
+            <div className={`idea-alert-icon ${alert.type}`}>
+              {alert.type === "success" ? "✓" : "!"}
+            </div>
+
+            <h2 id="idea-alert-title">{alert.title}</h2>
+            <p id="idea-alert-message">{alert.message}</p>
+
+            <button type="button" onClick={() => setAlert(null)}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
