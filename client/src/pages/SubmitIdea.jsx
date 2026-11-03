@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Send, Lightbulb } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
@@ -22,6 +22,21 @@ export default function SubmitIdea() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState(null);
 
+  // Prevents rapid repeated clicks before React updates the UI.
+  const submissionLock = useRef(false);
+
+  // Remembers the last successfully submitted form.
+  const lastSubmittedKey = useRef(null);
+
+  function createSubmissionKey(data, file) {
+    return JSON.stringify({
+      ...data,
+      pdfName: file?.name,
+      pdfSize: file?.size,
+      pdfLastModified: file?.lastModified,
+    });
+  }
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -29,6 +44,8 @@ export default function SubmitIdea() {
       ...previous,
       [name]: value,
     }));
+
+    setAlert(null);
   }
 
   function handlePdfChange(event) {
@@ -68,6 +85,9 @@ export default function SubmitIdea() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    // Stop rapid repeated submissions.
+    if (submissionLock.current || isSubmitting) return;
+
     setAlert(null);
 
     if (!pdf) {
@@ -89,6 +109,19 @@ export default function SubmitIdea() {
       return;
     }
 
+    const submissionKey = createSubmissionKey(formData, pdf);
+
+    // Stop submission if this exact form was already submitted.
+    if (submissionKey === lastSubmittedKey.current) {
+      setAlert({
+        type: "success",
+        title: "Idea already submitted",
+        message:
+          "This idea has already been submitted. Change the details if you want to submit a new idea.",
+      });
+      return;
+    }
+
     const data = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -97,13 +130,17 @@ export default function SubmitIdea() {
 
     data.append("pdf", pdf);
 
-    try {
-      setIsSubmitting(true);
+    submissionLock.current = true;
+    setIsSubmitting(true);
 
+    try {
       await submitIdea({
         formData: data,
         token,
       });
+
+      // Remember the successful submission.
+      lastSubmittedKey.current = submissionKey;
 
       setAlert({
         type: "success",
@@ -119,9 +156,20 @@ export default function SubmitIdea() {
           error.message || "Something went wrong. Please try again.",
       });
     } finally {
+      submissionLock.current = false;
       setIsSubmitting(false);
     }
   }
+
+  const currentSubmissionKey = pdf
+    ? createSubmissionKey(formData, pdf)
+    : null;
+
+  const alreadySubmitted =
+    // eslint-disable-next-line react-hooks/refs
+    currentSubmissionKey !== null &&
+    // eslint-disable-next-line react-hooks/refs
+    currentSubmissionKey === lastSubmittedKey.current;
 
   return (
     <>
@@ -253,9 +301,18 @@ export default function SubmitIdea() {
           <div className="idea-form-footer">
             <p>You can review your idea before submitting it.</p>
 
-            <button type="submit" disabled={isSubmitting}>
+            <button
+              type="submit"
+              // eslint-disable-next-line react-hooks/refs
+              disabled={isSubmitting || alreadySubmitted}
+            >
               <Send size={16} />
-              {isSubmitting ? "Submitting..." : "Submit for review"}
+              {isSubmitting
+                ? "Submitting..."
+                // eslint-disable-next-line react-hooks/refs
+                : alreadySubmitted
+                  ? "Already submitted"
+                  : "Submit for review"}
             </button>
           </div>
         </form>

@@ -137,35 +137,55 @@ export async function teacherReview (req,res){
         })
     }
 }
-export async function reviewIdeaController(req,res){
-    const allowedStatuses = ["under_review","approved","rejected"];
+export async function reviewIdeaController(req, res) {
+    const allowedStatuses = ["under_review", "approved", "rejected"];
+
     try {
         const ideaId = req.params.id;
         const teacherId = req.user.userId;
         const status = req.body?.status;
-        if(!status){
+        const feedback = req.body?.feedback;
+
+        if (!status) {
             return res.status(400).json({
-                message:"Please set a status for the Idea."
-            })
+                message: "Please set a status for the Idea."
+            });
         }
-        else if(allowedStatuses.includes(status)){
-        const ideaResult = await teacherApprovalUpdate(ideaId,teacherId,status)
-        return res.status(200).json(ideaResult)
-        }
-        else{
+
+        if (!allowedStatuses.includes(status)) {
             return res.status(400).json({
-                message:"Choose an appropriate Status"
-            })
+                message: "Choose an appropriate Status"
+            });
         }
-        
-    }
-    catch(error){
-        console.error(error)
+
+        if (feedback !== undefined && typeof feedback !== "string") {
+            return res.status(400).json({
+                message: "Feedback must be text."
+            });
+        }
+
+        if (status === "rejected" && !feedback?.trim()) {
+            return res.status(400).json({
+                message: "Please provide feedback when rejecting an idea."
+            });
+        }
+
+        const ideaResult = await teacherApprovalUpdate(
+            ideaId,
+            teacherId,
+            status,
+            feedback
+        );
+
+        return res.status(200).json(ideaResult);
+
+    } catch (error) {
+        console.error("Failed to review idea:", error);
+
         return res.status(500).json({
             message: "Something went wrong"
-        })
+        });
     }
-
 }
 
 export async function getAllIdeasController(req,res){

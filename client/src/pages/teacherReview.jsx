@@ -87,7 +87,7 @@ export default function TeacherReview() {
       setMessage("");
       setError("");
 
-      const updatedIdea = await updateIdeaReview(id, decision, token);
+      const updatedIdea = await updateIdeaReview(id, decision, token , feedback);
 
       setIdea((previousIdea) => ({
         ...previousIdea,

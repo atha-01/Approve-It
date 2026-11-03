@@ -51,6 +51,7 @@ model Idea {
   submittedById String  @db.Uuid
   uploadedById  String  @db.Uuid
   reviewedById  String? @db.Uuid
+  feedback String?
 
   academicYear String
   pdfPath      String

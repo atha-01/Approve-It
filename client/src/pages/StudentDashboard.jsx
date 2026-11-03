@@ -11,6 +11,9 @@ import {
   Plus,
   CalendarDays,
   Lightbulb,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 import Navbar from "../components/layout/Navbar";
@@ -23,6 +26,7 @@ export default function StudentDashboard() {
   const [ideas, setIdeas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [expandedIdeaId, setExpandedIdeaId] = useState(null);
 
   useEffect(() => {
     async function fetchIdeas() {
@@ -49,7 +53,9 @@ export default function StudentDashboard() {
   }, [token]);
 
   const pendingCount = ideas.filter(
-    (idea) => idea.status === "pending"
+    (idea) =>
+      idea.status === "pending" ||
+      idea.status === "under_review"
   ).length;
 
   const approvedCount = ideas.filter(
@@ -83,6 +89,12 @@ export default function StudentDashboard() {
     };
 
     return labels[status] || status;
+  }
+
+  function toggleFeedback(ideaId) {
+    setExpandedIdeaId((currentId) =>
+      currentId === ideaId ? null : ideaId
+    );
   }
 
   return (
@@ -216,6 +228,42 @@ export default function StudentDashboard() {
                       {formatStatus(idea.status)}
                     </span>
                   </div>
+
+                  {/* Teacher feedback */}
+                  {idea.feedback?.trim() ? (
+                    <div className="student-feedback-section">
+                      <button
+                        type="button"
+                        className="student-feedback-toggle"
+                        onClick={() => toggleFeedback(idea.id)}
+                        aria-expanded={expandedIdeaId === idea.id}
+                      >
+                        <span>
+                          <MessageSquare size={17} />
+                          View teacher feedback
+                        </span>
+
+                        {expandedIdeaId === idea.id ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
+                      </button>
+
+                      {expandedIdeaId === idea.id && (
+                        <div className="student-feedback-content">
+                          <strong>Teacher's feedback</strong>
+                          <p>{idea.feedback}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : idea.status === "rejected" ? (
+                    <div className="student-feedback-section">
+                      <p className="student-no-feedback">
+                        No teacher feedback was provided.
+                      </p>
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>

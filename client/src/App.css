@@ -1082,6 +1082,69 @@
   }
 }
 
+/* Student teacher feedback section */
+
+.student-feedback-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.student-feedback-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: #a5b4fc;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-feedback-toggle span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-feedback-toggle:hover {
+  color: #c7d2fe;
+}
+
+.student-feedback-content {
+  margin-top: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.student-feedback-content strong {
+  display: block;
+  color: #ffffff;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.student-feedback-content p {
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.student-no-feedback {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 5px 0;
+}
+
+
 
 /* Teacher dashboard */
 
@@ -3967,4 +4030,18 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+/* Submit idea confirmation popup text contrast */
+
+.idea-alert-popup {
+  background: #ffffff;
+  color: #111827;
+}
+
+.idea-alert-popup h2 {
+  color: #111827 !important;
+}
+
+.idea-alert-popup p {
+  color: #4b5563 !important;
 }

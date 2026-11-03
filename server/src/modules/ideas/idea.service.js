@@ -89,13 +89,14 @@ export async function getAllIdeasForReview() {
 }
 
 
-export async function teacherApprovalUpdate(ideaId, teacherId, status) {
+export async function teacherApprovalUpdate(ideaId, teacherId, status, feedback) {
     const searchResult = await prisma.idea.update({
         where: {
             id: ideaId
         },
         data: {
             status: status,
+            feedback: feedback?.trim() || null,
             reviewedById: teacherId,
             reviewedAt: new Date()
         },
@@ -104,6 +105,7 @@ export async function teacherApprovalUpdate(ideaId, teacherId, status) {
             title: true,
             description: true,
             status: true,
+            feedback: true,
             academicYear: true,
             submittedById: true,
             uploadedById: true,

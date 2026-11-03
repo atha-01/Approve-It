@@ -53,20 +53,25 @@ export async function getIdeaById(id, token) {
 
   return result;
 }
-export async function updateIdeaReview(id, status, token) {
+export async function updateIdeaReview(id, status, token, feedback = "") {
   const response = await fetch(`${API_BASE_URL}/${id}/review`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({
+      status,
+      feedback,
+    }),
   });
 
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(result.message || "Unable to update idea status.");
+    throw new Error(
+      result.message || "Unable to update idea status."
+    );
   }
 
   return result;
