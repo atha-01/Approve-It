@@ -41,6 +41,11 @@ model Idea {
   id          String     @id @default(uuid()) @db.Uuid
   title       String
   description String
+  
+  category         String
+  problemStatement String
+  proposedSolution String
+
   status      IdeaStatus @default(pending)
 
   submittedById String  @db.Uuid

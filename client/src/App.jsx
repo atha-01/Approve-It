@@ -17,7 +17,7 @@ import IdeaDetails from "./pages/ideaDetails.jsx";
 import TeacherReview from "./pages/teacherReview.jsx";
 import Archives from "./pages/archives.jsx";
 import ApprovedIdeas from "./pages/ApprovedIdeas.jsx";
-import AdminDashboard from "./pages/adminDashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Profile from "./pages/profile.jsx";
 
 import "./App.css";

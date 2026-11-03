@@ -9,6 +9,9 @@ export async function createIdea({
     academicYear,
     pdfPath,
     pdfFileName,
+    category,
+    problemStatement,
+    proposedSolution
 }) {
     // Confirm that the selected submitter is a student.
     const student = await prisma.user.findUnique({
@@ -31,6 +34,9 @@ export async function createIdea({
             academicYear,
             pdfPath,
             pdfFileName,
+            category,
+            problemStatement,
+            proposedSolution,
         },
         select: {
             id: true,
@@ -42,6 +48,9 @@ export async function createIdea({
             submittedById: true,
             uploadedById: true,
             createdAt: true,
+            category:true,
+            problemStatement:true,
+            proposedSolution:true,
         },
     });
 

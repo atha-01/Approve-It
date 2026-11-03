@@ -4,7 +4,7 @@ import { auth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 
 const router = express.Router();
-router.post("/", auth,requireRole("teacher"), ideaController);
+router.post("/", auth,requireRole("student"), ideaController);
 router.get("/", auth, searchIdeas);
 router.get("/database",auth , getAllIdeasController);
 router.get("/review",auth, requireRole("teacher"),teacherReview);

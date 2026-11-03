@@ -28,8 +28,14 @@ export async function ideaController(req, res) {
         uploadedFilePath = req.file.path;
 
         // Read the fields sent with the multipart form.
-        const { title, description, submittedById, academicYear } =
-            req.body;
+        const {
+            title,
+            description,
+            category,
+            problemStatement,
+            proposedSolution,
+            academicYear
+        } = req.body;
 
         // Validate the required fields.
         if (
@@ -37,17 +43,20 @@ export async function ideaController(req, res) {
             !title.trim() ||
             typeof description !== "string" ||
             !description.trim() ||
-            typeof submittedById !== "string" ||
-            !submittedById.trim() ||
             typeof academicYear !== "string" ||
-            !academicYear.trim()
+            !academicYear.trim()||
+            typeof category !== "string" ||
+            !category.trim() ||
+            typeof problemStatement !== "string" ||
+            !problemStatement.trim() ||
+            typeof proposedSolution !== "string" ||
+            !proposedSolution.trim()
         ) {
             await fs.unlink(uploadedFilePath);
             uploadedFilePath = undefined;
 
             return res.status(400).json({
-                message:
-                    "Title, description, student submitter, and academic year are required.",
+               message: "Title, description, category, problem statement, proposed solution, and academic year are required.",
             });
         }
 
@@ -55,7 +64,10 @@ export async function ideaController(req, res) {
         const createdIdea = await createIdea({
             title: title.trim(),
             description: description.trim(),
-            submittedById: submittedById.trim(),
+            category: category.trim(),
+            problemStatement: problemStatement.trim(),
+            proposedSolution: proposedSolution.trim(),
+            submittedById: req.user.userId,
             uploadedById: req.user.userId,
             academicYear: academicYear.trim(),
             pdfPath: uploadedFilePath,

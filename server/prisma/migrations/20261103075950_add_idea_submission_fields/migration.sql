@@ -1,0 +1,4 @@
+ALTER TABLE "Idea"
+ADD COLUMN "category" TEXT NOT NULL,
+ADD COLUMN "problemStatement" TEXT NOT NULL,
+ADD COLUMN "proposedSolution" TEXT NOT NULL;
