@@ -4061,3 +4061,149 @@
 .idea-alert-popup p {
   color: #4b5563 !important;
 }
+
+/* =========================================
+   IDEA DATABASE - PROJECT CARDS
+========================================= */
+
+.database-ideas-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.database-idea-card {
+  min-width: 0;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.database-idea-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-popover);
+}
+
+.database-idea-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.database-idea-info h3 {
+  margin: 8px 0;
+  color: var(--color-text);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.database-idea-info p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.database-idea-category {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.database-idea-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-top: 13px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.database-idea-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.database-idea-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 11px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+
+.database-idea-status.pending {
+  background: rgba(234, 179, 8, 0.12);
+  color: #b77908;
+}
+
+.database-idea-status.under_review {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.database-idea-status.approved {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.database-idea-status.rejected {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.database-idea-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.database-idea-view-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .database-ideas-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .database-idea-card {
+    padding: 18px;
+  }
+
+  .database-idea-info h3 {
+    font-size: 18px;
+  }
+}
+
