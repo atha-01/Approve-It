@@ -21,7 +21,11 @@ import {
 
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getTeacherApplications } from "../services/adminService";
+import {
+  getTeacherApplications,
+  approveTeacherApplication,
+  rejectTeacherApplication,
+} from "../services/adminService";
 
 const navigationItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -39,12 +43,14 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [confirmationAction, setConfirmationAction] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [applications, setApplications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch applications from the backend
+  // Fetch applications from backend
   useEffect(() => {
     if (!token) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -123,18 +129,57 @@ export default function AdminDashboard() {
   }
 
   function handleAction(action) {
+    setRejectionReason("");
     setConfirmationAction(action);
   }
 
-  function confirmAction() {
-    if (!confirmationAction) return;
+  // Approve or reject teacher application
+  async function confirmAction() {
+    if (!confirmationAction || !selectedApplication || isProcessing) {
+      return;
+    }
 
-    setNotice(
-      `${confirmationAction === "approve" ? "Approval" : "Rejection"} confirmed. Backend integration is still pending.`
-    );
+    if (
+      confirmationAction === "reject" &&
+      !rejectionReason.trim()
+    ) {
+      setNotice("Please enter a rejection reason.");
+      return;
+    }
 
-    setConfirmationAction(null);
-    setSelectedApplication(null);
+    try {
+      setIsProcessing(true);
+      setNotice("");
+
+      if (confirmationAction === "approve") {
+        await approveTeacherApplication(
+          selectedApplication.id,
+          token
+        );
+
+        setNotice("Teacher application approved successfully.");
+      } else {
+        await rejectTeacherApplication(
+          selectedApplication.id,
+          rejectionReason.trim(),
+          token
+        );
+
+        setNotice("Teacher application rejected successfully.");
+      }
+
+      // Refresh applications after successful action
+      const data = await getTeacherApplications(token);
+      setApplications(data);
+
+      setConfirmationAction(null);
+      setSelectedApplication(null);
+      setRejectionReason("");
+    } catch (err) {
+      setNotice(err.message || "Something went wrong.");
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
@@ -394,7 +439,12 @@ export default function AdminDashboard() {
         {selectedApplication && (
           <div
             className="admin-modal-backdrop"
-            onClick={() => setSelectedApplication(null)}
+            onClick={() => {
+              if (!isProcessing) {
+                setSelectedApplication(null);
+                setConfirmationAction(null);
+              }
+            }}
           >
             <section
               className="admin-detail-modal"
@@ -412,8 +462,14 @@ export default function AdminDashboard() {
                 </div>
 
                 <button
-                  onClick={() => setSelectedApplication(null)}
+                  onClick={() => {
+                    if (!isProcessing) {
+                      setSelectedApplication(null);
+                      setConfirmationAction(null);
+                    }
+                  }}
                   aria-label="Close details"
+                  disabled={isProcessing}
                 >
                   <X size={20} />
                 </button>
@@ -450,6 +506,7 @@ export default function AdminDashboard() {
                   <button
                     className="admin-reject-button"
                     onClick={() => handleAction("reject")}
+                    disabled={isProcessing}
                   >
                     <XCircle size={17} />
                     Reject
@@ -458,17 +515,13 @@ export default function AdminDashboard() {
                   <button
                     className="admin-approve-button"
                     onClick={() => handleAction("approve")}
+                    disabled={isProcessing}
                   >
                     <CheckCircle size={17} />
                     Approve
                   </button>
                 </div>
               )}
-
-              <p className="admin-modal-footnote">
-                Approval and rejection will become functional after backend
-                integration.
-              </p>
 
               {confirmationAction && (
                 <div className="admin-confirm-backdrop">
@@ -507,10 +560,28 @@ export default function AdminDashboard() {
                       </p>
                     )}
 
+                    {confirmationAction === "reject" && (
+                      <textarea
+                        placeholder="Enter the reason for rejecting this application..."
+                        value={rejectionReason}
+                        onChange={(event) =>
+                          setRejectionReason(event.target.value)
+                        }
+                        rows={3}
+                        disabled={isProcessing}
+                      />
+                    )}
+
                     <div className="admin-confirm-actions">
                       <button
                         className="admin-confirm-cancel"
-                        onClick={() => setConfirmationAction(null)}
+                        onClick={() => {
+                          if (!isProcessing) {
+                            setConfirmationAction(null);
+                            setRejectionReason("");
+                          }
+                        }}
+                        disabled={isProcessing}
                       >
                         Cancel
                       </button>
@@ -522,11 +593,19 @@ export default function AdminDashboard() {
                             : "admin-confirm-reject"
                         }
                         onClick={confirmAction}
+                        disabled={
+                          isProcessing ||
+                          (confirmationAction === "reject" &&
+                            !rejectionReason.trim())
+                        }
                       >
-                        Confirm{" "}
-                        {confirmationAction === "approve"
-                          ? "Approval"
-                          : "Rejection"}
+                        {isProcessing
+                          ? "Processing..."
+                          : `Confirm ${
+                              confirmationAction === "approve"
+                                ? "Approval"
+                                : "Rejection"
+                            }`}
                       </button>
                     </div>
                   </div>

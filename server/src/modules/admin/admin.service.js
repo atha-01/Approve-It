@@ -128,6 +128,15 @@ export async function rejectTeacherService({appId,adminId,reason}){
                 reviewedAt: new Date(),
                 reviewedById: adminId,
                 rejectionReason:reason.trim()
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                status: true,
+                reviewedAt: true,
+                reviewedById: true,
+                rejectionReason: true
             }
             
         });
