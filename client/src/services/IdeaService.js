@@ -125,10 +125,10 @@ export async function getIdeasForDatabase(token, filters) {
         params.append("academicYear", filters.academicYear);
     }
 
-    // Add status if provided
-    if (filters && filters.status && filters.status !== "all") {
-        params.append("status", filters.status);
-    }
+        // // Add status if provided
+        // if (filters && filters.status && filters.status !== "all") {
+        //     params.append("status", filters.status);
+        // }
 
     // Add search keyword if provided
     if (filters && filters.query) {

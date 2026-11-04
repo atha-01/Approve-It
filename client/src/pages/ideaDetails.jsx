@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -11,58 +12,123 @@ import {
   MessageSquare,
   Download,
 } from "lucide-react";
+
 import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { getIdeaById } from "../services/IdeaService";
 
 export default function IdeaDetails() {
   const { id } = useParams();
+  const { token, isCheckingSession } = useAuth();
 
-  // Temporary sample data. We will replace this with backend data later.
-  const idea = {
-    title: "Smart Campus Navigation System",
-    category: "Web Development",
-    status: "Pending",
-    description:
-      "A web-based platform that helps students, staff, and visitors navigate the college campus easily.",
-    problemStatement:
-      "New students and visitors often struggle to find classrooms, laboratories, offices, and other facilities across the campus.",
-    proposedSolution:
-      "Develop an interactive campus map with searchable locations, directions, and important campus information.",
-    submittedBy: "Student name",
-    assignedTeacher: "Not assigned yet",
-    submittedOn: "Not available",
-    feedback: "No teacher feedback has been provided yet.",
-  };
+  const [idea, setIdea] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch the actual idea using its ID
+  useEffect(() => {
+    if (isCheckingSession) return;
+
+    if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+      setError("Please log in to view this project.");
+      return;
+    }
+
+    async function fetchIdea() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const result = await getIdeaById(id, token);
+
+        setIdea(result);
+      } catch (error) {
+        setError(error.message || "Unable to load project details.");
+        setIdea(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchIdea();
+  }, [id, token, isCheckingSession]);
+
+  // Loading state
+  if (isCheckingSession || loading) {
+    return (
+      <>
+        <Navbar />
+        <main className="idea-details page-container">
+          <p>Loading project details...</p>
+        </main>
+      </>
+    );
+  }
+
+  // Error state
+  if (error || !idea) {
+    return (
+      <>
+        <Navbar />
+        <main className="idea-details page-container">
+          <Link to="/idea-database" className="database-back-link">
+            <ArrowLeft size={17} />
+            Back to Idea Database
+          </Link>
+
+          <section className="idea-details-card">
+            <h2>Unable to load project</h2>
+            <p>{error || "The requested project could not be found."}</p>
+          </section>
+        </main>
+      </>
+    );
+  }
+
+  const status = idea.status || "pending";
 
   const statusIcon =
-    idea.status === "Approved"
+    status === "approved"
       ? CheckCircle2
-      : idea.status === "Rejected"
+      : status === "rejected"
         ? FileText
         : Clock3;
 
   const StatusIcon = statusIcon;
+
+  const submittedOn = idea.createdAt
+    ? new Date(idea.createdAt).toLocaleDateString("en-IN")
+    : "Not available";
+
+  const submittedBy = idea.submittedBy?.name || "Unknown";
+  const assignedTeacher = idea.reviewedBy?.name || "Not assigned yet";
+  const feedback =
+    idea.feedback || "No teacher feedback has been provided yet.";
 
   return (
     <>
       <Navbar />
 
       <main className="idea-details page-container">
-        <Link to="/dashboard" className="database-back-link">
+        <Link to="/idea-database" className="database-back-link">
           <ArrowLeft size={17} />
-          Back to dashboard
+          Back to Idea Database
         </Link>
 
         <section className="idea-details-heading">
           <p className="section-kicker">PROJECT INFORMATION</p>
+
           <div className="idea-details-title-row">
             <div>
               <h1>{idea.title}</h1>
               <p>{idea.category}</p>
             </div>
 
-            <span className={`idea-status idea-status-${idea.status.toLowerCase()}`}>
+            <span className={`idea-status idea-status-${status}`}>
               <StatusIcon size={16} />
-              {idea.status}
+              {status.replace("_", " ")}
             </span>
           </div>
         </section>
@@ -71,17 +137,17 @@ export default function IdeaDetails() {
           <div className="idea-details-main">
             <section className="idea-details-card">
               <h2>Project overview</h2>
-              <p>{idea.description}</p>
+              <p>{idea.description || "No description provided."}</p>
             </section>
 
             <section className="idea-details-card">
               <h2>Problem statement</h2>
-              <p>{idea.problemStatement}</p>
+              <p>{idea.problemStatement || "Not provided."}</p>
             </section>
 
             <section className="idea-details-card">
               <h2>Proposed solution</h2>
-              <p>{idea.proposedSolution}</p>
+              <p>{idea.proposedSolution || "Not provided."}</p>
             </section>
 
             <section className="idea-details-card">
@@ -89,7 +155,8 @@ export default function IdeaDetails() {
                 <MessageSquare size={19} />
                 <h2>Teacher feedback</h2>
               </div>
-              <p>{idea.feedback}</p>
+
+              <p>{feedback}</p>
             </section>
           </div>
 
@@ -101,15 +168,15 @@ export default function IdeaDetails() {
                 <UserRound size={18} />
                 <div>
                   <span>Submitted by</span>
-                  <strong>{idea.submittedBy}</strong>
+                  <strong>{submittedBy}</strong>
                 </div>
               </div>
 
               <div className="idea-info-item">
                 <GraduationCap size={19} />
                 <div>
-                  <span>Assigned teacher</span>
-                  <strong>{idea.assignedTeacher}</strong>
+                  <span>Reviewed by</span>
+                  <strong>{assignedTeacher}</strong>
                 </div>
               </div>
 
@@ -117,7 +184,15 @@ export default function IdeaDetails() {
                 <CalendarDays size={18} />
                 <div>
                   <span>Submission date</span>
-                  <strong>{idea.submittedOn}</strong>
+                  <strong>{submittedOn}</strong>
+                </div>
+              </div>
+
+              <div className="idea-info-item">
+                <FileText size={18} />
+                <div>
+                  <span>Academic year</span>
+                  <strong>{idea.academicYear || "Not available"}</strong>
                 </div>
               </div>
 
@@ -125,7 +200,7 @@ export default function IdeaDetails() {
                 <FileText size={18} />
                 <div>
                   <span>Idea reference</span>
-                  <strong>{id}</strong>
+                  <strong>{idea.id}</strong>
                 </div>
               </div>
             </section>
@@ -133,10 +208,11 @@ export default function IdeaDetails() {
             <section className="idea-details-card idea-document-card">
               <FileText size={23} />
               <h2>Project document</h2>
+
               <p>
-                An approved project PDF will be available here when it is
-                uploaded.
+                PDF viewing and downloading will be connected next.
               </p>
+
               <button type="button" disabled>
                 <Download size={16} />
                 PDF not available

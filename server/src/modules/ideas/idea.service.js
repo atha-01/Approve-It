@@ -156,17 +156,19 @@ export async function teacherApprovalUpdate(ideaId, teacherId, status, feedback)
     })
     return searchResult;
 }
-
 export async function getAllIdeasForDatabase({
     academicYear,
-    status,
-    query                                                                               // destructuctured
+    query
 }) {
     const searchResult = await prisma.idea.findMany({
         where: {
-            ...(academicYear && { academicYear }),
-            ...(status && { status }),
+            // Only approved ideas should appear in the database.
+            status: "approved",
 
+            // Apply academic year filter if provided.
+            ...(academicYear && { academicYear }),
+
+            // Search across project information if a keyword is provided.
             ...(query && {
                 OR: [
                     {

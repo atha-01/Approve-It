@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
@@ -21,10 +20,6 @@ export default function IdeaDatabase() {
     searchParams.get("query") || searchParams.get("q") || ""
   );
 
-  const [status, setStatus] = useState(
-    searchParams.get("status") || "all"
-  );
-
   const [academicYear, setAcademicYear] = useState(
     searchParams.get("academicYear") || ""
   );
@@ -33,7 +28,7 @@ export default function IdeaDatabase() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Apply search and filters
+  // Apply search and academic year filter
   function handleSearch(event) {
     event.preventDefault();
 
@@ -43,10 +38,6 @@ export default function IdeaDatabase() {
       params.set("query", query.trim());
     }
 
-    if (status !== "all") {
-      params.set("status", status);
-    }
-
     if (academicYear.trim()) {
       params.set("academicYear", academicYear.trim());
     }
@@ -54,7 +45,7 @@ export default function IdeaDatabase() {
     setSearchParams(params);
   }
 
-  // Fetch ideas whenever the search filters change
+  // Fetch approved ideas whenever search filters change
   useEffect(() => {
     if (!token) {
       return;
@@ -68,19 +59,14 @@ export default function IdeaDatabase() {
         const searchQuery =
           searchParams.get("query") || searchParams.get("q") || "";
 
-        const searchStatus =
-          searchParams.get("status") || "all";
-
         const searchYear =
           searchParams.get("academicYear") || "";
 
         setQuery(searchQuery);
-        setStatus(searchStatus);
         setAcademicYear(searchYear);
 
         const filters = {
           academicYear: searchYear,
-          status: searchStatus,
           query: searchQuery,
         };
 
@@ -146,7 +132,7 @@ export default function IdeaDatabase() {
           <div className="database-filters">
             <span>
               <SlidersHorizontal size={16} />
-              Filter ideas
+              Approved projects only
             </span>
 
             <input
@@ -158,18 +144,6 @@ export default function IdeaDatabase() {
                 setAcademicYear(event.target.value)
               }
             />
-
-            <select
-              aria-label="Filter ideas by status"
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-            >
-              <option value="all">All ideas</option>
-              <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-              <option value="under_review">Under Review</option>
-              <option value="rejected">Rejected</option>
-            </select>
 
             <button
               type="button"
@@ -184,8 +158,10 @@ export default function IdeaDatabase() {
         <section className="database-results">
           <div className="database-results-heading">
             <div>
-              <h2>Project ideas</h2>
-              <p>Explore ideas submitted to your college.</p>
+              <h2>Approved project ideas</h2>
+              <p>
+                Explore projects approved by your college.
+              </p>
             </div>
           </div>
 
@@ -207,7 +183,7 @@ export default function IdeaDatabase() {
             </div>
           ) : loading ? (
             <div className="database-empty-state">
-              <p>Loading project ideas...</p>
+              <p>Loading approved project ideas...</p>
             </div>
           ) : error ? (
             <div className="database-empty-state">
@@ -220,11 +196,11 @@ export default function IdeaDatabase() {
                 <FileSearch size={30} />
               </div>
 
-              <h3>No project ideas found</h3>
+              <h3>No approved projects found</h3>
 
               <p>
-                No ideas match your current search or filters.
-                Try changing your search criteria.
+                No approved projects match your current search
+                or academic year. Try changing your search criteria.
               </p>
             </div>
           ) : (
@@ -265,10 +241,8 @@ export default function IdeaDatabase() {
                   </div>
 
                   <div className="database-idea-actions">
-                    <span
-                      className={`database-idea-status database-status-${idea.status}`}
-                    >
-                      {idea.status.replace("_", " ")}
+                    <span className="database-idea-status approved">
+                      Approved
                     </span>
 
                     <Link to={`/ideas/${idea.id}`}>

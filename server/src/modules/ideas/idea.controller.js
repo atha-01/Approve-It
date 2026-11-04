@@ -194,33 +194,11 @@ export async function reviewIdeaController(req, res) {
 
 export async function getAllIdeasController(req, res) {
     try {
-        const allowedStatuses = [
-            "pending",
-            "under_review",
-            "approved",
-            "rejected"
-        ];
-
         const academicYear = req.query.academicYear;
-        let status = req.query.status;
         const query = req.query.query?.trim();
 
-        // Treat "all" as no status filter
-        if (status === "all" || !status) {
-            status = undefined;
-        }
-
-        // Validate status if one is provided and that provided status must be only one of our 4. Nothing new
-        if (status && !allowedStatuses.includes(status)) {
-            return res.status(400).json({
-                message: "Invalid status"
-            });
-        }
-
-        // Get matching ideas from the service
         const receivedIdeaDetails = await getAllIdeasForDatabase({
             academicYear,
-            status,
             query
         });
 
