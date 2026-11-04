@@ -63,6 +63,24 @@ export async function getIdeasByUser(userId) {
         where: {
             submittedById: userId,
         },
+            select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            problemStatement: true,
+            proposedSolution: true,
+            status: true,
+            feedback: true,
+            academicYear: true,
+            pdfFileName: true,
+            submittedById: true,
+            uploadedById: true,
+            reviewedById: true,
+            reviewedAt: true,
+            createdAt: true,
+            updatedAt: true,
+        }
 
     });
     return fetchIdeas;
@@ -71,7 +89,24 @@ export async function getIdeasByUser(userId) {
 
 export async function getAllIdeasForReview() {
     const toBeReviewed = await prisma.idea.findMany({
-        include: {
+        select: {
+            id: true,
+            title: true,
+            description: true,
+            category: true,
+            problemStatement: true,
+            proposedSolution: true,
+            status: true,
+            feedback: true,
+            academicYear: true,
+            pdfFileName: true,
+            submittedById: true,
+            uploadedById: true,
+            reviewedById: true,
+            reviewedAt: true,
+            createdAt: true,
+            updatedAt: true,
+
             submittedBy: {
                 select: {
                     id: true,
