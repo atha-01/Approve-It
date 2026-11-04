@@ -214,3 +214,18 @@ export async function findIdeaByStudents(ideaId) {
     })
     return searchResult;
 }
+
+export async function getIdeaPdfDetails(ideaId){
+    const result = await prisma.idea.findUnique({
+        where:{
+            id:ideaId
+        },
+        select:{
+            id:true,
+            pdfFileName:true,
+            pdfPath:true,
+            submittedById:true
+        }
+    })
+    return result
+}

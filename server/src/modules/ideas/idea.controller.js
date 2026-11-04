@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises'
+import path from "node:path";
 import {
     createIdea,
     getIdeasByUser,
@@ -5,10 +7,12 @@ import {
     teacherApprovalUpdate,
     getAllIdeasForDatabase,
     findIdeaByStudents,
+    getIdeaPdfDetails
 } from "./idea.service.js";
 
 import { processIdeaPdfUpload } from "./idea.upload.js";
-import fs from 'node:fs/promises'
+import { uploadDirectory } from "./idea.upload.js";
+
 
 
 export async function ideaController(req, res) {
@@ -233,4 +237,81 @@ export async function findIdeasByStdsController(req,res){
             message:"Internal Server Error."
         })
     } 
+}
+export async function pdfDetailsController(req, res) {
+    try {
+        const ideaId = req.params.id;
+        const recievedData = await getIdeaPdfDetails(ideaId);
+
+        if (!recievedData) {
+            return res.status(404).json({
+                message: "Idea not found."
+            });
+        }
+
+        // Check user authorization.
+        const userId = req.user.userId;
+        const userRole = req.user.role;
+
+        if (
+            userRole !== "teacher" &&
+            !(userRole === "student" &&
+              recievedData.submittedById === userId)
+        ) {
+            return res.status(403).json({
+                message: "You are not authorized to access this PDF."
+            });
+        }
+
+        // Resolve and validate the stored file path.
+        const filePath = path.resolve(recievedData.pdfPath);
+        const relativePath = path.relative(uploadDirectory, filePath);
+
+        if (
+            relativePath.startsWith("..") ||
+            path.isAbsolute(relativePath)
+        ) {
+            return res.status(403).json({
+                message: "Invalid PDF location."
+            });
+        }
+
+        // Check whether the PDF actually exists.
+        await fs.access(filePath);
+
+        const safeFileName = path.basename(recievedData.pdfFileName)
+            .replace(/["\\]/g, "_");
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${safeFileName}"`
+        );
+        res.setHeader("Cache-Control", "private, no-store");
+
+        return res.sendFile(filePath, (error) => {
+            if (error) {
+                console.error("PDF sending failed:", error);
+
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        message: "Unable to send PDF."
+                    });
+                }
+            }
+        });
+
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            return res.status(404).json({
+                message: "PDF file not found on server."
+            });
+        }
+
+        console.error("PDF retrieval failed:", error);
+
+        return res.status(500).json({
+            message: "Internal Server Error."
+        });
+    }
 }
