@@ -63,7 +63,7 @@ export async function getIdeasByUser(userId) {
         where: {
             submittedById: userId,
         },
-            select: {
+        select: {
             id: true,
             title: true,
             description: true,
@@ -80,9 +80,12 @@ export async function getIdeasByUser(userId) {
             reviewedAt: true,
             createdAt: true,
             updatedAt: true,
-        }
-
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
     });
+
     return fetchIdeas;
 }
 
