@@ -18,6 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import {
   getIdeaById,
   updateIdeaReview,
+  getIdeaPdf
 } from "../services/IdeaService";
 
 export default function TeacherReview() {
@@ -30,6 +31,17 @@ export default function TeacherReview() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +99,7 @@ export default function TeacherReview() {
       setMessage("");
       setError("");
 
-      const updatedIdea = await updateIdeaReview(id, decision, token , feedback);
+      const updatedIdea = await updateIdeaReview(id, decision, token, feedback);
 
       setIdea((previousIdea) => ({
         ...previousIdea,
@@ -115,7 +127,28 @@ export default function TeacherReview() {
       year: "numeric",
     });
   }
+  async function handleViewPdf() {
+    try {
+      setPdfLoading(true);
+      setPdfError("");
+      setPdfUrl("");
 
+      const pdfBlob = await getIdeaPdf(id, token);
+      const newPdfUrl = URL.createObjectURL(pdfBlob);
+
+      setPdfUrl((previousUrl) => {
+        if (previousUrl) {
+          URL.revokeObjectURL(previousUrl);
+        }
+
+        return newPdfUrl;
+      });
+    } catch (err) {
+      setPdfError(err.message || "Unable to load synopsis PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
   return (
     <>
       <Navbar />
@@ -241,6 +274,43 @@ export default function TeacherReview() {
                   <p className="review-completed-message">
                     This idea has been {statusLabels[currentStatus]?.toLowerCase()}.
                   </p>
+                )}
+              </section>
+              <section className="teacher-review-card">
+                <h2>Student synopsis PDF</h2>
+
+                <p className="review-helper-text">
+                  View the PDF uploaded by the student before making your decision.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleViewPdf}
+                  disabled={pdfLoading}
+                >
+                  <FileText size={17} />
+                  {pdfLoading ? "Loading PDF..." : "View Synopsis PDF"}
+                </button>
+
+                {pdfError && (
+                  <p className="review-message" role="alert">
+                    {pdfError}
+                  </p>
+                )}
+
+                {pdfUrl && (
+                  <div className="teacher-pdf-viewer">
+                    <iframe
+                      src={pdfUrl}
+                      title="Student synopsis PDF"
+                      width="100%"
+                      height="600px"
+                    />
+
+                    <a href={pdfUrl} download="Student-Synopsis.pdf">
+                      Download Synopsis PDF
+                    </a>
+                  </div>
                 )}
               </section>
             </div>

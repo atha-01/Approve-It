@@ -1908,7 +1908,23 @@
   }
 }
 
+.teacher-pdf-viewer {
+  margin-top: 20px;
+  width: 100%;
+}
 
+.teacher-pdf-viewer iframe {
+  display: block;
+  width: 100%;
+  min-height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.teacher-pdf-viewer a {
+  display: inline-block;
+  margin-top: 12px;
+}
 
 /* Approved Ideas Page */
 

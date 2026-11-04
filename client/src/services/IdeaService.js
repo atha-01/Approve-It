@@ -94,3 +94,21 @@ export async function getIdeasForReview(token) {
 
   return result;
 }
+export async function getIdeaPdf(id, token) {
+  const response = await fetch(`${API_BASE_URL}/${id}/pdf`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+
+    throw new Error(
+      result.message || "Unable to fetch the PDF."
+    );
+  }
+
+  return await response.blob();
+}
