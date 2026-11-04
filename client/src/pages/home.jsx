@@ -187,7 +187,7 @@ export default function Home() {
             ApproveIT
           </Link>
           <p>Discover thoughtfully. Build something meaningful.</p>
-          <span>College Idea Checker</span>
+          <span>ApproveIT 2026 All Rights Reserved.</span>
         </div>
       </footer>
     </>
