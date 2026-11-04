@@ -48,7 +48,7 @@ export async function ideaController(req, res) {
             typeof description !== "string" ||
             !description.trim() ||
             typeof academicYear !== "string" ||
-            !academicYear.trim()||
+            !academicYear.trim() ||
             typeof category !== "string" ||
             !category.trim() ||
             typeof problemStatement !== "string" ||
@@ -60,7 +60,7 @@ export async function ideaController(req, res) {
             uploadedFilePath = undefined;
 
             return res.status(400).json({
-               message: "Title, description, category, problem statement, proposed solution, and academic year are required.",
+                message: "Title, description, category, problem statement, proposed solution, and academic year are required.",
             });
         }
 
@@ -82,7 +82,7 @@ export async function ideaController(req, res) {
     } catch (error) {
         // Remove the uploaded file if database creation or validation fails.
         if (uploadedFilePath) {
-            await fs.unlink(uploadedFilePath).catch(() => {});
+            await fs.unlink(uploadedFilePath).catch(() => { });
         }
 
         // Handle Multer upload errors.
@@ -117,27 +117,27 @@ export async function ideaController(req, res) {
         });
     }
 }
-export async function searchIdeas(req,res){
-    try{
+export async function searchIdeas(req, res) {
+    try {
         const userIdOfIdeaSender = req.user.userId;
         const recievedIdeas = await getIdeasByUser(userIdOfIdeaSender);
         return res.status(200).json(recievedIdeas);
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            message:"Something went wrong..."
+            message: "Something went wrong..."
         })
     }
 }
 
-export async function teacherReview (req,res){
+export async function teacherReview(req, res) {
     try {
         const ideas = await getAllIdeasForReview()
         return res.status(200).json(ideas)
     }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            message:"Something went wrong",
+            message: "Something went wrong",
         })
     }
 }
@@ -213,38 +213,39 @@ export async function getAllIdeasController(req, res) {
     }
 }
 
-export async function findIdeasByStdsController(req,res){
-    try{
+export async function findIdeasByStdsController(req, res) {
+    try {
 
-    const result = req.params.id;
-    if(!result){
-        return res.status(400).json({
-            message:"Couldn't find any idea to query"
-        })
+        const result = req.params.id;
+        if (!result) {
+            return res.status(400).json({
+                message: "Couldn't find any idea to query"
+            })
+        }
+        const recievedRes = await findIdeaByStudents(result);
+        if (!recievedRes) {
+            return res.status(404).json({
+                message: "Please enter an Idea",
+            })
+        }
+        else {
+            return res.status(200).json(recievedRes)
+        }
+
     }
-    const recievedRes = await findIdeaByStudents(result);
-    if(!recievedRes){
-        return res.status(404).json({
-            message:"Please enter an Idea",
-        })
-    }
-    else{  
-        return res.status(200).json(recievedRes)
-    }
-    
-    }
-    catch(error){
+    catch (error) {
         return res.status(500).json({
-            message:"Internal Server Error."
+            message: "Internal Server Error."
         })
-    } 
+    }
 }
+
 export async function pdfDetailsController(req, res) {
     try {
         const ideaId = req.params.id;
-        const recievedData = await getIdeaPdfDetails(ideaId);
+        const receivedData = await getIdeaPdfDetails(ideaId);
 
-        if (!recievedData) {
+        if (!receivedData) {
             return res.status(404).json({
                 message: "Idea not found."
             });
@@ -254,18 +255,26 @@ export async function pdfDetailsController(req, res) {
         const userId = req.user.userId;
         const userRole = req.user.role;
 
-        if (
-            userRole !== "teacher" &&
-            !(userRole === "student" &&
-              recievedData.submittedById === userId)
-        ) {
+        const isOwner = receivedData.submittedById === userId;
+        const isPrivilegedUser =
+            userRole === "teacher" || userRole === "admin";
+        const isApproved = receivedData.status === "approved";
+
+        if (!isOwner && !isPrivilegedUser && !isApproved) {
             return res.status(403).json({
                 message: "You are not authorized to access this PDF."
             });
         }
 
+        // Check whether a PDF exists.
+        if (!receivedData.pdfPath || !receivedData.pdfFileName) {
+            return res.status(404).json({
+                message: "PDF not found for this idea."
+            });
+        }
+
         // Resolve and validate the stored file path.
-        const filePath = path.resolve(recievedData.pdfPath);
+        const filePath = path.resolve(receivedData.pdfPath);
         const relativePath = path.relative(uploadDirectory, filePath);
 
         if (
@@ -280,7 +289,7 @@ export async function pdfDetailsController(req, res) {
         // Check whether the PDF actually exists.
         await fs.access(filePath);
 
-        const safeFileName = path.basename(recievedData.pdfFileName)
+        const safeFileName = path.basename(receivedData.pdfFileName)
             .replace(/["\\]/g, "_");
 
         res.setHeader("Content-Type", "application/pdf");

@@ -15,7 +15,10 @@ import {
 
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { getIdeaById } from "../services/IdeaService";
+import {
+  getIdeaById,
+  getIdeaPdf,
+} from "../services/IdeaService";
 
 export default function IdeaDetails() {
   const { id } = useParams();
@@ -24,6 +27,9 @@ export default function IdeaDetails() {
   const [idea, setIdea] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
 
   // Fetch the actual idea using its ID
   useEffect(() => {
@@ -42,7 +48,6 @@ export default function IdeaDetails() {
         setError("");
 
         const result = await getIdeaById(id, token);
-
         setIdea(result);
       } catch (error) {
         setError(error.message || "Unable to load project details.");
@@ -54,6 +59,38 @@ export default function IdeaDetails() {
 
     fetchIdea();
   }, [id, token, isCheckingSession]);
+
+  // Download the actual project PDF
+  async function handlePdfDownload() {
+    try {
+      setPdfLoading(true);
+      setPdfError("");
+
+      const pdfBlob = await getIdeaPdf(id, token);
+
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = idea.pdfFileName || `${idea.title}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Revoke the temporary URL after the browser has started downloading
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(pdfUrl);
+      }, 1000);
+
+    } catch (error) {
+      setPdfError(
+        error.message || "Unable to download the PDF."
+      );
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   // Loading state
   if (isCheckingSession || loading) {
@@ -104,6 +141,7 @@ export default function IdeaDetails() {
 
   const submittedBy = idea.submittedBy?.name || "Unknown";
   const assignedTeacher = idea.reviewedBy?.name || "Not assigned yet";
+
   const feedback =
     idea.feedback || "No teacher feedback has been provided yet.";
 
@@ -210,13 +248,22 @@ export default function IdeaDetails() {
               <h2>Project document</h2>
 
               <p>
-                PDF viewing and downloading will be connected next.
+                {idea.pdfFileName || "Project synopsis PDF"}
               </p>
 
-              <button type="button" disabled>
+              <button
+                type="button"
+                onClick={handlePdfDownload}
+                disabled={pdfLoading}
+                className="download-pdf-button"
+              >
                 <Download size={16} />
-                PDF not available
+                {pdfLoading ? "Downloading..." : "Download PDF"}
               </button>
+
+              {pdfError && (
+                <p>{pdfError}</p>
+              )}
             </section>
           </aside>
         </div>

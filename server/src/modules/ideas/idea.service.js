@@ -241,6 +241,9 @@ export async function findIdeaByStudents(ideaId) {
             status: true,
             academicYear: true,
 
+            pdfFileName:true,
+            feedback:true,
+            submittedById:true,
             submittedBy: {
                 select: {
                     name: true,
@@ -250,11 +253,16 @@ export async function findIdeaByStudents(ideaId) {
 
             uploadedById: true,
             reviewedById: true,
+            reviewedBy:{
+                select:{
+                    name:true,
+                },
+            },
             reviewedAt: true,
             createdAt: true,
             updatedAt: true,
         }
-    })
+    });
     return searchResult;
 }
 
@@ -267,7 +275,8 @@ export async function getIdeaPdfDetails(ideaId){
             id:true,
             pdfFileName:true,
             pdfPath:true,
-            submittedById:true
+            submittedById:true,
+            status:true
         }
     })
     return result
