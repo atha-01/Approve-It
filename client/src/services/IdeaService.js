@@ -112,3 +112,50 @@ export async function getIdeaPdf(id, token) {
 
   return await response.blob();
 }
+
+
+export async function getIdeasForDatabase(token, filters) {
+
+  // filters is simply an object containing the user's selected filters. Each if checks whether a filter was provided before adding it to the URL.
+
+    const params = new URLSearchParams();
+
+    // Add academic year if provided
+    if (filters && filters.academicYear) {
+        params.append("academicYear", filters.academicYear);
+    }
+
+    // Add status if provided
+    if (filters && filters.status && filters.status !== "all") {
+        params.append("status", filters.status);
+    }
+
+    // Add search keyword if provided
+    if (filters && filters.query) {
+        params.append("query", filters.query);
+    }
+
+    // Create the request URL
+    const url = `${API_BASE_URL}/database?${params.toString()}`;
+
+    // Send request to backend
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    // Read the response
+    const result = await response.json().catch(() => []);
+
+    // Check for errors
+    if (!response.ok) {
+        throw new Error(
+            result.message || "Unable to fetch ideas from the database."
+        );
+    }
+
+    // Return the ideas
+    return result;
+}

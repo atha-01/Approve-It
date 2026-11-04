@@ -1,35 +1,102 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
   Search,
   SlidersHorizontal,
-  Database,
   ArrowLeft,
   FileSearch,
 } from "lucide-react";
+
 import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { getIdeasForDatabase } from "../services/IdeaService";
 
 export default function IdeaDatabase() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [status, setStatus] = useState("all");
 
+  const { token, isCheckingSession } = useAuth();
+
+  const [query, setQuery] = useState(
+    searchParams.get("query") || searchParams.get("q") || ""
+  );
+
+  const [status, setStatus] = useState(
+    searchParams.get("status") || "all"
+  );
+
+  const [academicYear, setAcademicYear] = useState(
+    searchParams.get("academicYear") || ""
+  );
+
+  const [ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Apply search and filters
   function handleSearch(event) {
     event.preventDefault();
 
     const params = new URLSearchParams();
 
     if (query.trim()) {
-      params.set("q", query.trim());
+      params.set("query", query.trim());
     }
 
     if (status !== "all") {
       params.set("status", status);
     }
 
+    if (academicYear.trim()) {
+      params.set("academicYear", academicYear.trim());
+    }
+
     setSearchParams(params);
   }
+
+  // Fetch ideas whenever the search filters change
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    async function fetchIdeas() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const searchQuery =
+          searchParams.get("query") || searchParams.get("q") || "";
+
+        const searchStatus =
+          searchParams.get("status") || "all";
+
+        const searchYear =
+          searchParams.get("academicYear") || "";
+
+        setQuery(searchQuery);
+        setStatus(searchStatus);
+        setAcademicYear(searchYear);
+
+        const filters = {
+          academicYear: searchYear,
+          status: searchStatus,
+          query: searchQuery,
+        };
+
+        const result = await getIdeasForDatabase(token, filters);
+
+        setIdeas(result);
+      } catch (error) {
+        setError(error.message);
+        setIdeas([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchIdeas();
+  }, [token, searchParams]);
 
   return (
     <>
@@ -43,7 +110,9 @@ export default function IdeaDatabase() {
 
         <section className="database-heading">
           <p className="section-kicker">EXPLORE PROJECTS</p>
+
           <h1>Idea Database</h1>
+
           <p>
             Discover previously submitted college projects.
             Search before you start building something new.
@@ -54,7 +123,10 @@ export default function IdeaDatabase() {
           <form className="database-search" onSubmit={handleSearch}>
             <Search size={21} aria-hidden="true" />
 
-            <label className="visually-hidden" htmlFor="database-search-input">
+            <label
+              className="visually-hidden"
+              htmlFor="database-search-input"
+            >
               Search project ideas
             </label>
 
@@ -74,8 +146,18 @@ export default function IdeaDatabase() {
           <div className="database-filters">
             <span>
               <SlidersHorizontal size={16} />
-              Filter by status
+              Filter ideas
             </span>
+
+            <input
+              type="text"
+              className="database-year-filter"
+              placeholder="Academic year (e.g. 2026-27)"
+              value={academicYear}
+              onChange={(event) =>
+                setAcademicYear(event.target.value)
+              }
+            />
 
             <select
               aria-label="Filter ideas by status"
@@ -85,6 +167,7 @@ export default function IdeaDatabase() {
               <option value="all">All ideas</option>
               <option value="approved">Approved</option>
               <option value="pending">Pending</option>
+              <option value="under_review">Under Review</option>
               <option value="rejected">Rejected</option>
             </select>
 
@@ -106,23 +189,96 @@ export default function IdeaDatabase() {
             </div>
           </div>
 
-          <div className="database-empty-state">
-            <div className="database-empty-icon">
-              <FileSearch size={30} />
+          {isCheckingSession ? (
+            <p>Checking your login...</p>
+          ) : !token ? (
+            <div className="database-empty-state">
+              <div className="database-empty-icon">
+                <FileSearch size={30} />
+              </div>
+
+              <h3>Login required</h3>
+
+              <p>
+                Please log in to access your college idea database.
+              </p>
+
+              <Link to="/login">Login</Link>
             </div>
+          ) : loading ? (
+            <div className="database-empty-state">
+              <p>Loading project ideas...</p>
+            </div>
+          ) : error ? (
+            <div className="database-empty-state">
+              <h3>Unable to load ideas</h3>
+              <p>{error}</p>
+            </div>
+          ) : ideas.length === 0 ? (
+            <div className="database-empty-state">
+              <div className="database-empty-icon">
+                <FileSearch size={30} />
+              </div>
 
-            <h3>Idea database is ready to explore</h3>
+              <h3>No project ideas found</h3>
 
-            <p>
-              Project records will appear here once the database
-              is connected to the backend.
-            </p>
+              <p>
+                No ideas match your current search or filters.
+                Try changing your search criteria.
+              </p>
+            </div>
+          ) : (
+            <div className="database-ideas-list">
+              {ideas.map((idea) => (
+                <article
+                  className="database-idea-card"
+                  key={idea.id}
+                >
+                  <div className="database-idea-info">
+                    <h3>{idea.title}</h3>
 
-            <span className="database-coming-soon">
-              <Database size={14} />
-              Database integration pending
-            </span>
-          </div>
+                    <p>{idea.description}</p>
+
+                    <div className="database-idea-meta">
+                      <span>
+                        Category: {idea.category}
+                      </span>
+
+                      <span>
+                        Academic Year: {idea.academicYear}
+                      </span>
+
+                      <span>
+                        Submitted by: {
+                          idea.submittedBy
+                            ? idea.submittedBy.name
+                            : "Unknown"
+                        }
+                      </span>
+
+                      <span>
+                        Submitted on: {
+                          new Date(idea.createdAt).toLocaleDateString("en-IN")
+                        }
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="database-idea-actions">
+                    <span
+                      className={`database-idea-status database-status-${idea.status}`}
+                    >
+                      {idea.status.replace("_", " ")}
+                    </span>
+
+                    <Link to={`/ideas/${idea.id}`}>
+                      View details
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       </main>
     </>

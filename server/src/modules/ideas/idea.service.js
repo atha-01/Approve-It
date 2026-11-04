@@ -3,7 +3,7 @@ import prisma from "../../config/prisma.ts";
 
 export async function createIdea({
     title,
-    description,
+    description,                        //destrutctured
     submittedById,
     uploadedById,
     academicYear,
@@ -157,29 +157,70 @@ export async function teacherApprovalUpdate(ideaId, teacherId, status, feedback)
     return searchResult;
 }
 
-export async function getAllIdeasForDatabase(academicYear) {
+export async function getAllIdeasForDatabase({
+    academicYear,
+    status,
+    query                                                                               // destructuctured
+}) {
     const searchResult = await prisma.idea.findMany({
         where: {
-            academicYear: academicYear
-        },
+            ...(academicYear && { academicYear }),
+            ...(status && { status }),
 
+            ...(query && {
+                OR: [
+                    {
+                        title: {
+                            contains: query,
+                            mode: "insensitive"
+                        }
+                    },
+                    {
+                        description: {
+                            contains: query,
+                            mode: "insensitive"
+                        }
+                    },
+                    {
+                        category: {
+                            contains: query,
+                            mode: "insensitive"
+                        }
+                    },
+                    {
+                        problemStatement: {
+                            contains: query,
+                            mode: "insensitive"
+                        }
+                    },
+                    {
+                        proposedSolution: {
+                            contains: query,
+                            mode: "insensitive"
+                        }
+                    }
+                ]
+            })
+        },
         select: {
+            id: true,
             title: true,
+            description: true,
+            category: true,
             status: true,
             academicYear: true,
             createdAt: true,
-
             submittedBy: {
                 select: {
-                    name: true,
-                },
+                    name: true
+                }
             }
         },
         orderBy: {
-            createdAt: "desc",
-        },
+            createdAt: "desc"
+        }
+    });
 
-    })
     return searchResult;
 }
 

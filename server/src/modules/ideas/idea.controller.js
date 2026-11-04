@@ -192,23 +192,46 @@ export async function reviewIdeaController(req, res) {
     }
 }
 
-export async function getAllIdeasController(req,res){
-    try{
-        const year = req.query.academicYear;
-        if(!year){
-            return res.status(400).json({
-                message:"No records for this year"
-            })
-        }
-        const recievedIdeaDetails = await getAllIdeasForDatabase(year);
-        
+export async function getAllIdeasController(req, res) {
+    try {
+        const allowedStatuses = [
+            "pending",
+            "under_review",
+            "approved",
+            "rejected"
+        ];
 
-        res.status(200).json(recievedIdeaDetails);
+        const academicYear = req.query.academicYear;
+        let status = req.query.status;
+        const query = req.query.query?.trim();
+
+        // Treat "all" as no status filter
+        if (status === "all" || !status) {
+            status = undefined;
+        }
+
+        // Validate status if one is provided and that provided status must be only one of our 4. Nothing new
+        if (status && !allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid status"
+            });
+        }
+
+        // Get matching ideas from the service
+        const receivedIdeaDetails = await getAllIdeasForDatabase({
+            academicYear,
+            status,
+            query
+        });
+
+        return res.status(200).json(receivedIdeaDetails);
     }
-    catch(error){
-        res.status(500).json({
-            message:"Something went wrong..."
-        })
+    catch (error) {
+        console.error("Error fetching ideas:", error);
+
+        return res.status(500).json({
+            message: "Something went wrong..."
+        });
     }
 }
 
