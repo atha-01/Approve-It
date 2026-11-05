@@ -16,9 +16,9 @@ import IdeaDatabase from "./pages/IdeaDatabase.jsx";
 import IdeaDetails from "./pages/ideaDetails.jsx";
 import TeacherReview from "./pages/teacherReview.jsx";
 import Archives from "./pages/archives.jsx";
-import ApprovedIdeas from "./pages/ApprovedIdeas.jsx";
+// import ApprovedIdeas from "./pages/ApprovedIdeas.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
-import Profile from "./pages/profile.jsx";
+// import Profile from "./pages/profile.jsx";
 import Repositories from "./pages/Repositories.jsx";
 
 import "./App.css";
@@ -54,9 +54,9 @@ function AppRoutes() {
       <Route path="/database" element={<IdeaDatabase />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/approved-ideas" element={<ApprovedIdeas />} />
+      {/* <Route path="/approved-ideas" element={<ApprovedIdeas />} /> */}
       <Route path="/archives" element={<Archives />} />
-      <Route path="/profile" element={<Profile />} />
+      {/* <Route path="/profile" element={<Profile />} />  */}
 
       {/* Admin pages */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />

@@ -4,7 +4,7 @@ import {
     DeleteObjectCommand,
     GetObjectCommand
 } from "@aws-sdk/client-s3";
-
+import path from "node:path";
 import s3 from "../../config/s3.js";
 import { generatePdfKey, processIdeaPdfUpload } from "./idea.upload.js";
 import {
