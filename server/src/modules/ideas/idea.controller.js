@@ -1,5 +1,12 @@
-import fs from 'node:fs/promises'
-import path from "node:path";
+// new imports used when deployment was needed.
+import {
+    PutObjectCommand,
+    DeleteObjectCommand,
+    GetObjectCommand
+} from "@aws-sdk/client-s3";
+
+import s3 from "../../config/s3.js";
+import { generatePdfKey, processIdeaPdfUpload } from "./idea.upload.js";
 import {
     createIdea,
     getIdeasByUser,
@@ -10,28 +17,31 @@ import {
     getIdeaPdfDetails
 } from "./idea.service.js";
 
-import { processIdeaPdfUpload } from "./idea.upload.js";
-import { uploadDirectory } from "./idea.upload.js";
+
+//  Removed these because No longer using disk Storage
+// import fs from 'node:fs/promises'
+// import path from "node:path";
+// import { uploadDirectory } from "./idea.upload.js";
+// import { processIdeaPdfUpload } from "./idea.upload.js";
+
+
 
 
 
 export async function ideaController(req, res) {
-    let uploadedFilePath;
+    let uploadedObjectKey;
 
     try {
-        // Wait for Multer to finish processing the uploaded PDF.
+        // Process the uploaded PDF.
         await processIdeaPdfUpload(req, res);
 
-        // Make sure a PDF was uploaded.
         if (!req.file) {
             return res.status(400).json({
                 message: "Please upload a synopsis PDF.",
             });
         }
 
-        uploadedFilePath = req.file.path;
-
-        // Read the fields sent with the multipart form.
+        // Read the submitted idea details.
         const {
             title,
             description,
@@ -41,30 +51,34 @@ export async function ideaController(req, res) {
             academicYear
         } = req.body;
 
-        // Validate the required fields.
+        // Validate required fields.
         if (
-            typeof title !== "string" ||
-            !title.trim() ||
-            typeof description !== "string" ||
-            !description.trim() ||
-            typeof academicYear !== "string" ||
-            !academicYear.trim() ||
-            typeof category !== "string" ||
-            !category.trim() ||
-            typeof problemStatement !== "string" ||
-            !problemStatement.trim() ||
-            typeof proposedSolution !== "string" ||
-            !proposedSolution.trim()
+            typeof title !== "string" || !title.trim() ||
+            typeof description !== "string" || !description.trim() ||
+            typeof academicYear !== "string" || !academicYear.trim() ||
+            typeof category !== "string" || !category.trim() ||
+            typeof problemStatement !== "string" || !problemStatement.trim() ||
+            typeof proposedSolution !== "string" || !proposedSolution.trim()
         ) {
-            await fs.unlink(uploadedFilePath);
-            uploadedFilePath = undefined;
-
             return res.status(400).json({
                 message: "Title, description, category, problem statement, proposed solution, and academic year are required.",
             });
         }
 
-        // Save the idea and PDF metadata in PostgreSQL.
+        // Generate a unique S3 object key.
+        uploadedObjectKey = generatePdfKey();
+
+        // Upload the PDF to AWS S3.
+        await s3.send(
+            new PutObjectCommand({
+                Bucket: process.env.AWS_S3_BUCKET,
+                Key: uploadedObjectKey,
+                Body: req.file.buffer,
+                ContentType: "application/pdf",
+            })
+        );
+
+        // Save idea details and S3 object key in PostgreSQL.
         const createdIdea = await createIdea({
             title: title.trim(),
             description: description.trim(),
@@ -74,15 +88,25 @@ export async function ideaController(req, res) {
             submittedById: req.user.userId,
             uploadedById: req.user.userId,
             academicYear: academicYear.trim(),
-            pdfPath: uploadedFilePath,
+            pdfPath: uploadedObjectKey,
             pdfFileName: req.file.originalname,
         });
 
         return res.status(201).json(createdIdea);
+
     } catch (error) {
-        // Remove the uploaded file if database creation or validation fails.
-        if (uploadedFilePath) {
-            await fs.unlink(uploadedFilePath).catch(() => { });
+        // Delete the S3 object if the database operation fails.
+        if (uploadedObjectKey) {
+            try {
+                await s3.send(
+                    new DeleteObjectCommand({
+                        Bucket: process.env.AWS_S3_BUCKET,
+                        Key: uploadedObjectKey,
+                    })
+                );
+            } catch (cleanupError) {
+                console.error("Failed to clean up S3 PDF:", cleanupError);
+            }
         }
 
         // Handle Multer upload errors.
@@ -117,6 +141,7 @@ export async function ideaController(req, res) {
         });
     }
 }
+
 export async function searchIdeas(req, res) {
     try {
         const userIdOfIdeaSender = req.user.userId;
@@ -240,6 +265,7 @@ export async function findIdeasByStdsController(req, res) {
     }
 }
 
+
 export async function pdfDetailsController(req, res) {
     try {
         const ideaId = req.params.id;
@@ -266,62 +292,58 @@ export async function pdfDetailsController(req, res) {
             });
         }
 
-        // Check whether a PDF exists.
+        // Check whether PDF information exists.
         if (!receivedData.pdfPath || !receivedData.pdfFileName) {
             return res.status(404).json({
                 message: "PDF not found for this idea."
             });
         }
 
-        // Resolve and validate the stored file path.
-        const filePath = path.resolve(receivedData.pdfPath);
-        const relativePath = path.relative(uploadDirectory, filePath);
+        // Retrieve the PDF from AWS S3.
+        const s3Response = await s3.send(
+            new GetObjectCommand({
+                Bucket: process.env.AWS_S3_BUCKET,
+                Key: receivedData.pdfPath,
+            })
+        );
 
-        if (
-            relativePath.startsWith("..") ||
-            path.isAbsolute(relativePath)
-        ) {
-            return res.status(403).json({
-                message: "Invalid PDF location."
+        if (!s3Response.Body) {
+            return res.status(404).json({
+                message: "PDF file not found in storage."
             });
         }
 
-        // Check whether the PDF actually exists.
-        await fs.access(filePath);
-
+        // Prepare the PDF response.
         const safeFileName = path.basename(receivedData.pdfFileName)
             .replace(/["\\]/g, "_");
 
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
-            `inline; filename="${safeFileName}"`
+            `attachment; filename="${safeFileName}"`
         );
         res.setHeader("Cache-Control", "private, no-store");
 
-        return res.sendFile(filePath, (error) => {
-            if (error) {
-                console.error("PDF sending failed:", error);
-
-                if (!res.headersSent) {
-                    res.status(500).json({
-                        message: "Unable to send PDF."
-                    });
-                }
-            }
-        });
+        // Stream the PDF directly to the frontend.
+        return s3Response.Body.pipe(res);
 
     } catch (error) {
-        if (error.code === "ENOENT") {
+        if (
+            error.name === "NoSuchKey" ||
+            error.$metadata?.httpStatusCode === 404
+        ) {
             return res.status(404).json({
-                message: "PDF file not found on server."
+                message: "PDF file not found in storage."
             });
         }
 
         console.error("PDF retrieval failed:", error);
 
-        return res.status(500).json({
-            message: "Internal Server Error."
-        });
+        if (!res.headersSent) {
+            return res.status(500).json({
+                message: "Unable to retrieve PDF. Please try again later."
+            });
+        }
     }
 }
+
