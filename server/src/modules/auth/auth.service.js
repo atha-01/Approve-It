@@ -89,7 +89,7 @@ export async function loginUser(email, password, role) {
         },
         process.env.JWT_SECRET,
         {
-            expiresIn: "1h"
+            expiresIn: "12h"
         }
     );
 
