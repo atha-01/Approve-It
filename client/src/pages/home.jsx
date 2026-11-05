@@ -96,14 +96,14 @@ export default function Home() {
             <div className="hero-actions">
               <Link to="/database" className="button button-primary">
                 <Database size={18} aria-hidden="true" />
-                Check Idea Database
+                Check College Database
                 <ArrowRight size={17} aria-hidden="true" />
               </Link>
 
               <Link to="/repositories" className="button button-secondary">
 
                 <Code2 size={22} aria-hidden="true" />
-                Search Repositories
+                Check Other Sources
                 <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
             </div>
