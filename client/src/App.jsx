@@ -1,6 +1,6 @@
 
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import { Code2, Database } from "lucide-react";
+import { Database } from "lucide-react";
 
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -19,6 +19,7 @@ import Archives from "./pages/archives.jsx";
 import ApprovedIdeas from "./pages/ApprovedIdeas.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Profile from "./pages/profile.jsx";
+import Repositories from "./pages/Repositories.jsx";
 
 import "./App.css";
 
@@ -72,13 +73,7 @@ function AppRoutes() {
       {/* Other features */}
       <Route
         path="/repositories"
-        element={
-          <FeaturePlaceholder
-            title="Repository discovery"
-            description="External GitHub search is planned but is not connected to the backend yet."
-            icon={Code2}
-          />
-        }
+        element={<Repositories />}
       />
 
       {/* Fallback page */}
