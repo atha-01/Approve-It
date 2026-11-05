@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import academicPattern from "../assets/academic-pattern.svg";
@@ -13,10 +14,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   function submitIdeaSearch(event) {
     event.preventDefault();
@@ -27,19 +30,39 @@ export default function Home() {
       return;
     }
 
-    // The database page will consume this query once its search UI is implemented.
     navigate(`/database?q=${encodeURIComponent(query)}`);
   }
+
+  const dashboardPath =
+    user?.role === "admin"
+      ? "/admin/dashboard"
+      : user?.role === "teacher"
+      ? "/teacher/dashboard"
+      : "/dashboard";
+
+  const dashboardTitle =
+    user?.role === "admin"
+      ? "Open admin dashboard"
+      : user?.role === "teacher"
+      ? "Open teacher dashboard"
+      : "Open student dashboard";
+
+  const dashboardDescription =
+    user?.role === "admin"
+      ? "Manage teacher registration applications and oversee the platform."
+      : user?.role === "teacher"
+      ? "Review student project submissions and manage the idea approval process."
+      : "Track your submitted ideas, check their review status, and follow the approval process.";
 
   return (
     <>
       <Navbar />
 
       <main>
-<section
-  className="hero-section"
-  style={{ "--academic-pattern": `url(${academicPattern})` }}
->
+        <section
+          className="hero-section"
+          style={{ "--academic-pattern": `url(${academicPattern})` }}
+        >
           <div className="page-container hero-content">
             <div className="eyebrow">
               <span className="eyebrow-dot" />
@@ -101,7 +124,6 @@ export default function Home() {
               </Link>
 
               <Link to="/repositories" className="button button-secondary">
-
                 <Code2 size={22} aria-hidden="true" />
                 Check Other Sources
                 <ArrowUpRight size={16} aria-hidden="true" />
@@ -128,8 +150,8 @@ export default function Home() {
               </div>
 
               <p className="section-description">
-                One place to explore previous work and navigate the approval
-                process.
+                Explore existing college projects, discover useful resources,
+                and navigate the idea approval process.
               </p>
             </div>
 
@@ -138,13 +160,22 @@ export default function Home() {
                 <div className="discovery-icon discovery-icon-blue">
                   <FileSearch size={22} aria-hidden="true" />
                 </div>
-                <h3>Explore existing ideas</h3>
+
+                <h3>Explore approved ideas</h3>
+
                 <p>
-                  Browse project titles, descriptions, and their review
-                  status in the college database.
+                  Browse approved project titles, descriptions, and synopsis
+                  PDFs from the college database.
                 </p>
-                <Link to="/database" className="card-link">
-                  Open idea database <ArrowRight size={16} />
+
+                <Link
+                  to={isAuthenticated ? "/database" : "/login"}
+                  className="card-link"
+                >
+                  {isAuthenticated
+                    ? "Open idea database"
+                    : "Log in to explore ideas"}
+                  <ArrowRight size={16} />
                 </Link>
               </article>
 
@@ -152,28 +183,49 @@ export default function Home() {
                 <div className="discovery-icon discovery-icon-purple">
                   <BookOpen size={22} aria-hidden="true" />
                 </div>
-                <h3>Understand the review process</h3>
+
+                <h3>
+                  {isAuthenticated
+                    ? user?.role === "teacher"
+                      ? "Review student ideas"
+                      : user?.role === "admin"
+                      ? "Manage the platform"
+                      : "Track your project journey"
+                    : "Understand the review process"}
+                </h3>
+
                 <p>
-                  Follow your idea through teacher review and approval using
-                  the platform's available workflow.
+                  {isAuthenticated
+                    ? dashboardDescription
+                    : "Submit your project idea, follow its progress, and understand how teachers review and approve submissions."}
                 </p>
-                <Link to="/login" className="card-link">
-                  Log in to continue <ArrowRight size={16} />
+
+                <Link
+                  to={isAuthenticated ? dashboardPath : "/login"}
+                  className="card-link"
+                >
+                  {isAuthenticated
+                    ? dashboardTitle
+                    : "Log in to continue"}
+                  <ArrowRight size={16} />
                 </Link>
               </article>
 
               <article className="discovery-card">
                 <div className="discovery-icon discovery-icon-green">
-                        
                   <Code2 size={22} aria-hidden="true" />
                 </div>
-                <h3>Explore repositories</h3>
+
+                <h3>Explore external resources</h3>
+
                 <p>
-                  GitHub repository discovery is planned, but the external
-                  search integration is not connected yet.
+                  Discover code repositories, research papers, related ideas,
+                  articles, and technical resources from multiple sources.
                 </p>
+
                 <Link to="/repositories" className="card-link">
-                  View feature status <ArrowRight size={16} />
+                  Open Research Explorer
+                  <ArrowRight size={16} />
                 </Link>
               </article>
             </div>
