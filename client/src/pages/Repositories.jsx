@@ -100,7 +100,6 @@ function SearchResultCard({ result }) {
       <div className="research-result-top">
         <div className="research-result-source">
           <span className="research-result-icon">
-            // eslint-disable-next-line react-hooks/static-components
             <Icon size={19} />
           </span>
 
