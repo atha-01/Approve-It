@@ -1,0 +1,2 @@
+﻿ALTER TABLE "Idea"
+ADD COLUMN IF NOT EXISTS "feedback" TEXT;
