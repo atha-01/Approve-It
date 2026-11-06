@@ -149,10 +149,12 @@ export async function searchIdeas(req, res) {
         return res.status(200).json(recievedIdeas);
     }
     catch (error) {
-        return res.status(500).json({
-            message: "Something went wrong..."
-        })
-    }
+    console.error("Failed to fetch student ideas:", error);
+
+    return res.status(500).json({
+        message: "Something went wrong..."
+    });
+}
 }
 
 export async function teacherReview(req, res) {
