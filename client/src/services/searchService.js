@@ -1,5 +1,7 @@
 import API_BASE_URL from "../config/api.js";
-const SEARCH_API = `${API_BASE_URL}/ideas`;
+
+const SEARCH_API = `${API_BASE_URL}/search`;
+
 export async function searchResources(query, token) {
   const params = new URLSearchParams({
     q: query.trim(),
