@@ -1,8 +1,9 @@
-const API_BASE_URL = "/api/admin";
+import API_BASE_URL from "../config/api.js";
+const ADMIN_API = `${API_BASE_URL}/admin`;
 
 export async function getTeacherApplications(token) {
   const response = await fetch(
-    `${API_BASE_URL}/teacher-applications`,
+    `${ADMIN_API}/teacher-applications`,
     {
       method: "GET",
       headers: {
@@ -24,7 +25,7 @@ export async function getTeacherApplications(token) {
 
 export async function approveTeacherApplication(appId, token) {
   const response = await fetch(
-    `${API_BASE_URL}/teacher-applications/${appId}/approve`,
+    `${ADMIN_API}/teacher-applications/${appId}/approve`,
     {
       method: "PATCH",
       headers: {
@@ -44,7 +45,7 @@ export async function approveTeacherApplication(appId, token) {
 
 export async function rejectTeacherApplication(appId, reason, token) {
   const response = await fetch(
-    `${API_BASE_URL}/teacher-applications/${appId}/reject`,
+    `${ADMIN_API}/teacher-applications/${appId}/reject`,
     {
       method: "PATCH",
       headers: {

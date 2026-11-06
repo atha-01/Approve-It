@@ -1,7 +1,8 @@
-const API_BASE_URL = "/api/auth";
+import API_BASE_URL from "../config/api.js";
+const AUTH_API = `${API_BASE_URL}/auth`;
 
 async function sendAuthenticationRequest(endpoint, userData) {
-  const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+  const response = await fetch(`${AUTH_API}/${endpoint}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +45,7 @@ export function registerTeacher({email,password,name}){
 }
 
 export async function getCurrentUser(token) {
-  const response = await fetch(`${API_BASE_URL}/me`, {
+  const response = await fetch(`${AUTH_API}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

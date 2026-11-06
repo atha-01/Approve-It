@@ -1,7 +1,8 @@
-const API_BASE_URL = "/api/ideas";
+import API_BASE_URL from "../config/api.js";
+const IDEAS_API = `${API_BASE_URL}/ideas`;
 
 export async function submitIdea({ formData, token }) {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(IDEAS_API, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,7 +20,7 @@ export async function submitIdea({ formData, token }) {
 }
 
 export async function getMyIdeas(token) {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(IDEAS_API, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -38,7 +39,7 @@ export async function getMyIdeas(token) {
 }
 
 export async function getIdeaById(id, token) {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+  const response = await fetch(`${IDEAS_API}/${id}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -54,7 +55,7 @@ export async function getIdeaById(id, token) {
   return result;
 }
 export async function updateIdeaReview(id, status, token, feedback = "") {
-  const response = await fetch(`${API_BASE_URL}/${id}/review`, {
+  const response = await fetch(`${IDEAS_API}/${id}/review`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export async function updateIdeaReview(id, status, token, feedback = "") {
   return result;
 }
 export async function getIdeasForReview(token) {
-  const response = await fetch(`${API_BASE_URL}/review`, {
+  const response = await fetch(`${IDEAS_API}/review`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -95,7 +96,7 @@ export async function getIdeasForReview(token) {
   return result;
 }
 export async function getIdeaPdf(id, token) {
-  const response = await fetch(`${API_BASE_URL}/${id}/pdf`, {
+  const response = await fetch(`${IDEAS_API}/${id}/pdf`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -136,7 +137,7 @@ export async function getIdeasForDatabase(token, filters) {
     }
 
     // Create the request URL
-    const url = `${API_BASE_URL}/database?${params.toString()}`;
+    const url = `${IDEAS_API}/database?${params.toString()}`;
 
     // Send request to backend
     const response = await fetch(url, {

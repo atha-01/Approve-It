@@ -1,5 +1,5 @@
-const API_BASE_URL = "/api/search";
-
+import API_BASE_URL from "../config/api.js";
+const SEARCH_API = `${API_BASE_URL}/ideas`;
 export async function searchResources(query, token) {
   const params = new URLSearchParams({
     q: query.trim(),
@@ -11,7 +11,7 @@ export async function searchResources(query, token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}?${params.toString()}`, {
+  const response = await fetch(`${SEARCH_API}?${params.toString()}`, {
     method: "GET",
     headers,
   });
